@@ -36,11 +36,11 @@ User: 创建 Product 模块，需要后台 CRUD 和 API
 
 AI Workflow:
   1. Identify: Module=Product, Requirements=CRUD+API
-  2. Parse schema: scripts/parse_schema.php qs_product
-  3. Infer types: scripts/infer_types.php
+  2. Parse schema from migration or database
+  3. Infer field types using three-layer strategy
   4. Generate code from templates
-  5. Write files
-  6. Output TODO list
+  5. Write files to project directories
+  6. Output TODO list for manual steps
 ```
 
 See [Scaffold Workflow](#scaffold-workflow) below.

@@ -3,36 +3,49 @@
 /**
  * Infer field types for AntdAdmin forms
  *
+ * This script must be run from the QSCMF project root directory.
+ *
  * Three-layer strategy:
  * 1. Configuration file (.claude/qscmf/field-rules.yaml)
  * 2. Learned patterns from existing code
  * 3. Default rules based on field name patterns
  *
  * Usage:
- *   php scripts/infer_types.php <field_name>         # Single field
- *   php scripts/infer_types.php --scan <directory>   # Learn from code
- *   php scripts/infer_types.php --all                # Scan app/Admin/Controller/
+ *   cd /path/to/qscmf/project
+ *   php /path/to/skills/qscmf-backend/scripts/infer_types.php <field_name>
+ *   php /path/to/skills/qscmf-backend/scripts/infer_types.php --scan <directory>
+ *   php /path/to/skills/qscmf-backend/scripts/infer_types.php --all
  */
 
-// Bootstrap Laravel
-$projectRoot = __DIR__ . '/../../../../../../';
-require_once $projectRoot . 'lara/bootstrap/app.php';
+// Detect project root (current working directory)
+$projectRoot = getcwd();
 
-use Symfony\Component\Yaml\Yaml;
+if (!is_dir($projectRoot . '/lara') || !is_dir($projectRoot . '/app')) {
+    fwrite(STDERR, "Error: This script must be run from a QSCMF project root directory.\n");
+    fwrite(STDERR, "Usage: cd /path/to/qscmf/project && php infer_types.php <field_name>\n");
+    exit(1);
+}
 
 /**
  * Load field type configuration from project config
  */
 function loadFieldRules(): array
 {
-    $configPath = $projectRoot . '.claude/qscmf/field-rules.yaml';
+    global $projectRoot;
+    $configPath = $projectRoot . '/.claude/qscmf/field-rules.yaml';
 
     if (!file_exists($configPath)) {
         return [];
     }
 
-    $config = Yaml::parseFile($configPath);
-    return $config['field_types'] ?? $config ?? [];
+    $yaml = file_get_contents($configPath);
+    $config = [];
+    foreach (explode("\n", $yaml) as $line) {
+        if (preg_match('/^(\w+):\s*(\w+)/', $line, $matches)) {
+            $config[$matches[1]] = $matches[2];
+        }
+    }
+    return $config;
 }
 
 /**
@@ -40,7 +53,8 @@ function loadFieldRules(): array
  */
 function loadLearnedPatterns(): array
 {
-    $learnPath = $projectRoot . '.claude/qscmf/learned-field-types.json';
+    global $projectRoot;
+    $learnPath = $projectRoot . '/.claude/qscmf/learned-field-types.json';
 
     if (!file_exists($learnPath)) {
         return [];
@@ -191,7 +205,8 @@ function scanControllersForPatterns(string $directory): array
  */
 function saveLearnedPatterns(array $patterns): void
 {
-    $learnPath = $projectRoot . '.claude/qscmf';
+    global $projectRoot;
+    $learnPath = $projectRoot . '/.claude/qscmf';
     if (!is_dir($learnPath)) {
         mkdir($learnPath, 0755, true);
     }
@@ -218,7 +233,7 @@ if (php_sapi_name() === 'cli') {
 
     if ($command === '--scan') {
         // Scan directory and learn patterns
-        $directory = $argv[2] ?? $projectRoot . 'app/Admin/Controller/';
+        $directory = $argv[2] ?? $projectRoot . '/app/Admin/Controller/';
         echo "Scanning {$directory}...\n";
 
         $patterns = scanControllersForPatterns($directory);
@@ -229,7 +244,7 @@ if (php_sapi_name() === 'cli') {
 
     } elseif ($command === '--all') {
         // Scan default directory
-        $directory = $projectRoot . 'app/Admin/Controller/';
+        $directory = $projectRoot . '/app/Admin/Controller/';
         echo "Scanning {$directory}...\n";
 
         $patterns = scanControllersForPatterns($directory);

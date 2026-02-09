@@ -3,8 +3,11 @@
 /**
  * Parse table schema from migration file or database
  *
+ * This script must be run from the QSCMF project root directory.
+ *
  * Usage:
- *   php scripts/parse_schema.php <table_name>
+ *   cd /path/to/qscmf/project
+ *   php /path/to/skills/qscmf-backend/scripts/parse_schema.php <table_name>
  *
  * Output (JSON):
  *   {
@@ -15,9 +18,17 @@
  *   }
  */
 
+// Detect project root (current working directory)
+$projectRoot = getcwd();
+
+if (!is_dir($projectRoot . '/lara') || !is_dir($projectRoot . '/app')) {
+    fwrite(STDERR, "Error: This script must be run from a QSCMF project root directory.\n");
+    fwrite(STDERR, "Usage: cd /path/to/qscmf/project && php parse_schema.php <table_name>\n");
+    exit(1);
+}
+
 // Bootstrap Laravel
-$projectRoot = __DIR__ . '/../../../../../../';
-require_once $projectRoot . 'lara/bootstrap/app.php';
+require_once $projectRoot . '/lara/bootstrap/app.php';
 
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
@@ -40,7 +51,7 @@ $result = [
 ];
 
 // Option 1: Parse migration file
-$migration_path = $projectRoot . 'lara/database/migrations';
+$migration_path = $projectRoot . '/lara/database/migrations';
 $files = glob($migration_path . '/*' . str_replace('qs_', '', $table) . '*');
 
 if (!empty($files)) {
