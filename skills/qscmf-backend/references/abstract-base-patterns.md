@@ -543,11 +543,12 @@ abstract class AModuleContent extends QsListController
 **相关文档**：
 - [Admin Controllers](admin-controllers.md) - 标准 CRUD 模式
 - [Migration Metadata](migration-metadata.md) - 迁移文件元数据系统
-- [Models & Migrations](models-migrations.md) - 模型和迁移基础
+- [Migration Guide](migration-guide.md) - 数据库迁移指南
+- [Model Guide](model-guide.md) - 模型开发指南
 
 ---
 
 **相关文档**：
 - [Admin Controllers](admin-controllers.md)
 - [Migration Metadata](migration-metadata.md)
-- [Models & Migrations](models-migrations.md)
+- [Model Guide](model-guide.md)

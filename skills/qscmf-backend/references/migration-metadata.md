@@ -465,13 +465,14 @@ $table->foreign('cate_id')
 ---
 
 **相关文档**：
-- [Models & Migrations](models-migrations.md) - 模型和迁移基础
+- [Migration Guide](migration-guide.md) - 迁移基础语法
+- [Model Guide](model-guide.md) - 模型实现最佳实践
 - [Abstract Base Patterns](abstract-base-patterns.md) - 抽象基类模式
 - [CRUD Patterns](crud-patterns.md) - CRUD 开发模式
 
 ---
 
 **相关文档**：
-- [Models & Migrations](models-migrations.md)
+- [Model Guide](model-guide.md)
 - [Abstract Base Patterns](abstract-base-patterns.md)
 - [CRUD Patterns](crud-patterns.md)

@@ -530,5 +530,7 @@ try {
 
 - [Admin Controllers](admin-controllers.md) - 后台控制器开发
 - [Abstract Base Patterns](abstract-base-patterns.md) - 抽象基类模式
-- [Models & Migrations](models-migrations.md) - 模型与迁移
+- [Migration Guide](migration-guide.md) - 数据库迁移指南
+- [Model Guide](model-guide.md) - 模型开发指南
 - [Migration Metadata](migration-metadata.md) - 迁移元数据
+- [Where Query Reference](where-query-reference.md) - 查询语法参考

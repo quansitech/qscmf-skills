@@ -455,12 +455,29 @@ Detailed guides in `references/`:
   - Validation rules
   - Business logic encapsulation
   - Performance optimization
+  - Concurrency control
 
-- **[Models & Migrations](references/models-migrations.md)** - Models & migrations
-  - GyListModel structure
-  - Validation & auto-completion
-  - Laravel migrations
-  - Common query methods
+- **[Model Guide](references/model-guide.md)** - 模型开发指南
+  - GyListModel 代码规范
+  - 验证规则
+  - 查询方法封装
+  - 性能优化（N+1、缓存）
+  - 状态变更逻辑
+  - 完整模型示例
+
+- **[Migration Guide](references/migration-guide.md)** - 数据库迁移指南
+  - 迁移命令
+  - 列类型和修饰符
+  - 元数据注释系统
+  - 枚举列表
+  - 索引设计
+  - 表结构规范
+
+- **[Where Query Reference](references/where-query-reference.md)** - 查询语法参考
+  - Where 条件表达式
+  - 聚合查询
+  - JOIN 关联
+  - 排序和分页
 
 - **[Development Standards](references/development-standards.md)** - Standards & testing
   - PHP 8.2 coding standards
@@ -470,3 +487,17 @@ Detailed guides in `references/`:
   - Mock third-party APIs
   - Wall class pattern
   - Code review checklist
+
+### Architecture Patterns
+
+- **[Abstract Base Patterns](references/abstract-base-patterns.md)** - 抽象基类模式
+  - 分类模块模式 (ACate/ACateModel)
+  - 内容模块模式 (AContent/AContentModel)
+  - 标签模块模式 (ATag/ATagModel)
+  - 自定义扩展策略
+
+- **[Migration Metadata](references/migration-metadata.md)** - 迁移文件元数据系统
+  - 元数据属性和字段类型映射
+  - 代码生成规则
+  - 枚举列表系统
+  - 命名规范和最佳实践

@@ -430,5 +430,5 @@ sysLogs('操作描述, id:' . $id);
 
 - [Abstract Base Patterns](abstract-base-patterns.md) - 抽象基类模式
 - [Migration Metadata](migration-metadata.md) - 迁移文件元数据
-- [Models & Migrations](models-migrations.md) - 模型和迁移
+- [Migration Guide](migration-guide.md) - 数据库迁移指南
 - [Development Standards](development-standards.md) - 开发规范

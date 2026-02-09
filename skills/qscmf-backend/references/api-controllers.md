@@ -676,6 +676,6 @@ class XxxController extends \Qscmf\Api\RestController
 ## 相关文档
 
 - [Admin Controllers](admin-controllers.md) - 后台管理控制器
-- [Models & Migrations](models-migrations.md) - 模型和迁移
+- [Migration Guide](migration-guide.md) - 数据库迁移指南
 - [Abstract Base Patterns](abstract-base-patterns.md) - 抽象基类模式
 - [Development Standards](development-standards.md) - 开发规范
