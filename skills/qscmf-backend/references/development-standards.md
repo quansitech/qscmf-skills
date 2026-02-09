@@ -106,9 +106,9 @@ public function saveData() {}
 const MAX_COUNT = 100;
 const DEFAULT_TIMEOUT = 30;
 
-// 变量：camelCase
-$userList = [];
-$userId = 1;
+// 变量：snake_case
+$user_list = [];
+$user_id = 1;
 
 // 数据库字段：snake_case
 // user_id, create_time, is_enabled
