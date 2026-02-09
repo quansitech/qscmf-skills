@@ -1,10 +1,10 @@
-# QSCMF Backend Skill
+# QSCMF 后端开发技能
 
-Code generation and development guide for [QSCMF](https://github.com/baijunyao/thinkphp-bjy) framework (ThinkPHP 3.2 + Laravel hybrid).
+[QSCMF](https://github.com/quansitech/qs_cmf) 框架代码生成与开发指南。
 
-## Quick Start
+## 快速开始
 
-### Scaffold Mode (Code Generation)
+### 代码生成模式
 
 ```markdown
 "创建 Product 模块，需要后台 CRUD 和 API"
@@ -12,21 +12,21 @@ Code generation and development guide for [QSCMF](https://github.com/baijunyao/t
 "QSCMF scaffold Article"
 ```
 
-### Guide Mode (Development Q&A)
+### 开发指南模式
 
 ```markdown
-"如何实现 QsListController CRUD?"
-"AntdAdmin Table 组件如何使用?"
-"如何编写 PHPUnit 测试?"
+"如何实现 QsListController CRUD？"
+"AntdAdmin Table 组件如何使用？"
+"如何编写 PHPUnit 测试？"
 ```
 
-## What It Does
+## 功能特性
 
-- **Detects QSCMF projects**: `app/` + `lara/` directories, Gy_Library, AntdAdmin
-- **Generates CRUD modules**: Model, AdminController, ApiController, Migration, Tests
-- **Answers QSCMF questions**: Admin UI, RESTful API, Testing, Models
+- **自动检测 QSCMF 项目**：识别 `app/` + `lara/` 目录结构、Gy_Library、AntdAdmin
+- **生成 CRUD 模块**：Model、AdminController、ApiController、Migration、测试
+- **解答 QSCMF 问题**：后台 UI、RESTful API、测试、模型开发
 
-## Output Structure
+## 生成文件结构
 
 ```
 Model:          app/Common/Model/{{MODEL}}Model.class.php
@@ -36,17 +36,17 @@ Migration:      lara/database/migrations/xxxx_create_{{table}}_table.php
 Test:           lara/tests/Feature/{{MODEL}}Test.php
 ```
 
-## Documentation
+## 详细文档
 
-See [SKILL.md](./SKILL.md) for complete workflow:
-- Scaffold Mode (6-step generation process)
-- Framework Guide (code patterns, architecture)
-- Reference guides in `references/`
+查看 [SKILL.md](./SKILL.md) 了解完整工作流程：
+- 代码生成模式（6 步生成流程）
+- 框架开发指南（代码模式、架构）
+- `references/` 目录中的参考文档
 
-## Core Components
+## 核心组件
 
-| Component | Base Class |
-|-----------|-----------|
-| Admin CRUD | `QsListController` |
+| 组件 | 基类 |
+|------|------|
+| 后台 CRUD | `QsListController` |
 | RESTful API | `RestController` |
-| Model | `GyListModel` |
+| 模型 | `GyListModel` |
