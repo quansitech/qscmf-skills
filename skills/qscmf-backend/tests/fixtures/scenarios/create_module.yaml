@@ -1,0 +1,31 @@
+# Create Complete Module Test Scenario
+name: "Create Complete Module"
+description: "User wants to create a complete CRUD module"
+query: "创建 Product 模块，需要 Model、Admin CRUD、API、Test"
+user_intent: "创建完整模块，需要多个步骤"
+
+expected_tools:
+  - "workflow/workflow-create-module.md"
+  - "scaffold/scaffold-migration-first.md"
+  - "crud/crud-table-columns-v14.md"
+  - "api/api-response-format.md"
+  - "test/test-tdd-first.md"
+
+complexity: "complex"
+
+metrics:
+  max_tokens: 2500
+  max_files: 8
+  min_clarity: 0.85
+
+expected_response_patterns:
+  - "migration"
+  - "Model"
+  - "Controller"
+  - "test"
+
+validation_criteria:
+  - "Should reference workflow-create-module.md"
+  - "Should mention migration first"
+  - "Should list generated files"
+  - "Should output TODO list"

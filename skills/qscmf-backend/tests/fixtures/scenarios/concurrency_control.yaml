@@ -1,0 +1,25 @@
+# Concurrency Control Test Scenario
+name: "Redis Lock for Concurrency"
+description: "User wants to prevent race conditions"
+query: "如何防止并发操作导致的冲突？"
+user_intent: "用户想了解并发控制方案"
+
+expected_tools:
+  - "pattern/pattern-redis-lock.md"
+
+complexity: "medium"
+
+metrics:
+  max_tokens: 1000
+  max_files: 2
+  min_clarity: 0.9
+
+expected_response_patterns:
+  - "RedisLock"
+  - "acquire"
+  - "release"
+
+validation_criteria:
+  - "Should reference RedisLock pattern"
+  - "Should mention acquire/release methods"
+  - "Should show try-finally pattern"

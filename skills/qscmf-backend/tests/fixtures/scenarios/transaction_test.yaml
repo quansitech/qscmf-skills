@@ -1,0 +1,104 @@
+# Transaction Testing Scenario
+name: "事务测试场景"
+description: "测试数据库事务的正确性和回滚机制"
+query: "如何编写事务测试？"
+user_intent: "用户想了解如何为涉及多表操作的业务逻辑编写测试"
+
+expected_tools:
+  - "test/test-transaction.md"
+  - "test/test-tdd-first.md"
+
+complexity: "medium"
+
+metrics:
+  max_tokens: 2000
+  max_files: 5
+  min_clarity: 0.9
+
+expected_response_patterns:
+  - "startTrans"
+  - "commit"
+  - "rollback"
+  - "DB::beginTransaction"
+  - "setUp"
+  - "tearDown"
+
+validation_criteria:
+  - "应介绍事务测试的基本原则"
+  - "应提供 setUp/tearDown 事务隔离示例"
+  - "应包含回滚测试示例"
+  - "应包含并发事务测试示例"
+
+test_scenarios:
+  basic_transaction:
+    description: "基本事务测试"
+    code: |
+      public function testOrderWithItemsTransaction(): void
+      {
+          $this->runTp(function () {
+              D()->startTrans();
+              try {
+                  $orderId = D('Order')->add(['order_no' => 'ORD001']);
+                  D('OrderItem')->add(['order_id' => $orderId, 'product_id' => 1]);
+                  D()->commit();
+              } catch (\Exception $e) {
+                  D()->rollback();
+                  throw $e;
+              }
+          });
+      }
+
+  rollback_test:
+    description: "回滚测试"
+    code: |
+      public function testRollbackOnError(): void
+      {
+          $initialCount = D('Order')->count();
+
+          $this->runTp(function () {
+              D()->startTrans();
+              try {
+                  D('Order')->add(['order_no' => 'ORD002']);
+                  throw new \Exception('模拟错误');
+                  D()->commit();
+              } catch (\Exception $e) {
+                  D()->rollback();
+              }
+          });
+
+          $this->assertEquals($initialCount, D('Order')->count());
+      }
+
+  isolation_test:
+    description: "事务隔离测试"
+    code: |
+      protected function setUp(): void
+      {
+          parent::setUp();
+          DB::beginTransaction();
+      }
+
+      protected function tearDown(): void
+      {
+          DB::rollBack();
+          parent::tearDown();
+      }
+
+expected_outputs:
+  test_patterns:
+    - "setUp 中开始事务"
+    - "tearDown 中回滚事务"
+    - "测试异常情况的回滚"
+    - "验证数据一致性"
+
+  best_practices:
+    - "每个测试独立事务"
+    - "测试结束自动回滚"
+    - "避免测试间数据污染"
+    - "使用 runTp() 执行 ThinkPHP 代码"
+
+common_pitfalls:
+  - "忘记在 tearDown 中回滚"
+  - "事务嵌套问题"
+  - "外键约束导致回滚失败"
+  - "并发测试的竞态条件"

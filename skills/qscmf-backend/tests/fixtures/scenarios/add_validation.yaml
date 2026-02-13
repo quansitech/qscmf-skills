@@ -1,0 +1,25 @@
+# Form Validation Test Scenario
+name: "Add Form Validation"
+description: "User wants to add validation rules to a form"
+query: "如何添加表单验证规则？"
+user_intent: "用户想了解表单验证配置"
+
+expected_tools:
+  - "crud/crud-form-validation.md"
+
+complexity: "simple"
+
+metrics:
+  max_tokens: 800
+  max_files: 2
+  min_clarity: 0.95
+
+expected_response_patterns:
+  - "addRule"
+  - "Required"
+  - "validate"
+
+validation_criteria:
+  - "Should reference addRule method"
+  - "Should mention Required rule"
+  - "Should provide code example"

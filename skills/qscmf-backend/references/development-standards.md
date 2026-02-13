@@ -526,6 +526,283 @@ try {
 }
 ```
 
+## 自动化验证
+
+### 概述
+
+QSCMF 技能支持自动化代码规范验证，确保生成的代码符合团队标准。
+
+### 验证工具
+
+#### 1. PHP-CS-Fixer
+
+```bash
+# 安装
+composer require --dev friendsofphp/php-cs-fixer
+
+# 配置文件 .php-cs-fixer.php
+<?php
+$finder = PhpCsFixer\Finder::create()
+    ->in([__DIR__ . '/app', __DIR__ . '/lara/tests'])
+    ->name('*.php');
+
+return (new PhpCsFixer\Config())
+    ->setRules([
+        '@PSR12' => true,
+        'array_syntax' => ['syntax' => 'short'],
+        'strict_param' => true,
+        'strict_comparison' => true,
+        'declare_strict_types' => true,
+        'ordered_imports' => true,
+        'no_unused_imports' => true,
+        'phpdoc_order' => true,
+        'return_type_declaration' => ['space_before' => 'none'],
+    ])
+    ->setFinder($finder);
+
+# 运行检查
+vendor/bin/php-cs-fixer fix --dry-run --diff
+
+# 自动修复
+vendor/bin/php-cs-fixer fix
+```
+
+#### 2. PHPStan
+
+```bash
+# 安装
+composer require --dev phpstan/phpstan
+
+# 配置文件 phpstan.neon
+parameters:
+    level: 8
+    paths:
+        - app
+        - lara/tests
+    ignoreErrors:
+        - '#Call to static method#'
+    excludes_analyse:
+        - app/Common/Conf/*
+
+# 运行分析
+vendor/bin/phpstan analyse
+
+# 生成基线
+vendor/bin/phpstan analyse --generate-baseline
+```
+
+#### 3. PHPUnit 代码覆盖率
+
+```bash
+# 运行测试并生成覆盖率报告
+vendor/bin/phpunit --coverage-html coverage --coverage-text
+
+# 配置 phpunit.xml
+<coverage>
+    <include>
+        <directory suffix=".php">app/</directory>
+    </include>
+    <report>
+        <html outputDirectory="coverage"/>
+        <threshold>
+            <global>
+                <line>80</line>
+                <method>80</method>
+            </global>
+        </threshold>
+    </report>
+</coverage>
+```
+
+### 自动化检查脚本
+
+```bash
+#!/bin/bash
+# scripts/verify-code.sh
+
+set -e
+
+echo "=== 代码规范验证开始 ==="
+
+# 1. PHP-CS-Fixer 检查
+echo ">>> 检查代码格式..."
+vendor/bin/php-cs-fixer fix --dry-run --diff
+if [ $? -ne 0 ]; then
+    echo "❌ 代码格式检查失败"
+    echo "运行 vendor/bin/php-cs-fixer fix 修复"
+    exit 1
+fi
+echo "✅ 代码格式检查通过"
+
+# 2. PHPStan 静态分析
+echo ">>> 运行静态分析..."
+vendor/bin/phpstan analyse --memory-limit=1G
+if [ $? -ne 0 ]; then
+    echo "❌ 静态分析失败"
+    exit 1
+fi
+echo "✅ 静态分析通过"
+
+# 3. PHPUnit 测试
+echo ">>> 运行单元测试..."
+vendor/bin/phpunit --testdox
+if [ $? -ne 0 ]; then
+    echo "❌ 单元测试失败"
+    exit 1
+fi
+echo "✅ 单元测试通过"
+
+echo "=== 所有验证通过 ==="
+```
+
+### 验证规则清单
+
+#### Model 验证
+
+```php
+// 验证 Model 代码规范的测试
+public function testModelCompliance(): void
+{
+    $modelFile = 'app/Common/Model/ProductModel.class.php';
+    $content = file_get_contents($modelFile);
+
+    // 检查类型声明
+    $this->assertMatchesRegularExpression(
+        '/public function \w+\([^)]*\):\s*(\?array|\?int|bool|string|void)/',
+        $content,
+        '方法应有返回类型声明'
+    );
+
+    // 检查严格比较
+    $this->assertDoesNotMatchRegularExpression(
+        '/\s==\s|\s!=\s/',
+        $content,
+        '应使用严格比较 (===, !==)'
+    );
+
+    // 检查常量使用
+    $this->assertMatchesRegularExpression(
+        '/DBCont::/',
+        $content,
+        '应使用 DBCont 常量替代魔法数字'
+    );
+}
+```
+
+#### Controller 验证
+
+```php
+public function testControllerCompliance(): void
+{
+    $controllerFile = 'app/Admin/Controller/ProductController.class.php';
+    $content = file_get_contents($controllerFile);
+
+    // 检查继承
+    $this->assertStringContainsString(
+        'extends QsListController',
+        $content,
+        'Admin 控制器应继承 QsListController'
+    );
+
+    // 检查 configureContainer 方法（v14）
+    $this->assertStringContainsString(
+        'configureContainer',
+        $content,
+        'v14 应实现 configureContainer 方法'
+    );
+}
+```
+
+#### API 验证
+
+```php
+public function testApiResponseFormat(): void
+{
+    $response = $this->get('/api.php/Product/gets');
+    $json = $response->json();
+
+    // 验证响应结构
+    $this->assertArrayHasKey('status', $json);
+    $this->assertArrayHasKey('msg', $json);
+    $this->assertArrayHasKey('data', $json);
+
+    // 验证数据结构
+    $this->assertArrayHasKey('list', $json['data']);
+    $this->assertArrayHasKey('total', $json['data']);
+}
+```
+
+### CI/CD 集成
+
+#### GitHub Actions
+
+```yaml
+# .github/workflows/verify.yml
+name: Code Verification
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, xml, mysql, redis
+
+      - name: Install Dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: Check Code Style
+        run: vendor/bin/php-cs-fixer fix --dry-run --diff
+
+      - name: Static Analysis
+        run: vendor/bin/phpstan analyse --memory-limit=1G
+
+      - name: Run Tests
+        run: vendor/bin/phpunit --testdox
+```
+
+### 验证检查清单
+
+运行以下命令确保代码质量：
+
+```bash
+# 1. 格式检查
+vendor/bin/php-cs-fixer fix --dry-run --diff
+
+# 2. 静态分析
+vendor/bin/phpstan analyse
+
+# 3. 单元测试
+vendor/bin/phpunit
+
+# 4. 测试覆盖率
+vendor/bin/phpunit --coverage-text --coverage-html coverage
+
+# 5. 技能自测（在技能目录运行）
+pytest tests/test_skill_effectiveness.py -v
+pytest tests/test_regression.py -v
+```
+
+### 验证结果解读
+
+| 检查项 | 通过条件 | 失败处理 |
+|--------|---------|----------|
+| PHP-CS-Fixer | 无 diff 输出 | 运行 `php-cs-fixer fix` |
+| PHPStan | Level 8 无错误 | 修复类型问题或添加忽略规则 |
+| PHPUnit | 所有测试通过 | 检查失败的测试用例 |
+| 覆盖率 | >= 80% | 补充缺失的测试 |
+
 ## 相关文档
 
 - [Admin Controllers](admin-controllers.md) - 后台控制器开发
@@ -534,3 +811,4 @@ try {
 - [Model Guide](model-guide.md) - 模型开发指南
 - [Migration Metadata](migration-metadata.md) - 迁移元数据
 - [Where Query Reference](where-query-reference.md) - 查询语法参考
+- [Testing](testing.md) - 测试参考文档

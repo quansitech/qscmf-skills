@@ -1,0 +1,1299 @@
+---
+name: qscmf-backend
+description: |
+  QSCMF framework (ThinkPHP 3.2 + Laravel hybrid) backend development and code generation.
+
+  **Auto-detects QSCMF projects**: Contains app/ + lara/ directories, Gy_Library, AntdAdmin components.
+
+  **Scaffold Mode** (在 QSCMF 项目中自动触发, or 强制触发 with "QSCMF"):
+  - "创建 Product 模块" → Generate CRUD module (in QSCMF project context)
+  - "生成 User API" → Generate RESTful API (in QSCMF project context)
+  - "QSCMF scaffold Order" → Force trigger scaffold mode
+  - "创建 QSCMF CRUD for Article" → Explicit framework reference
+
+  **Guide Mode** (QSCMF 开发问题):
+  - "如何实现 QsListController CRUD?" - Admin development
+  - "AntdAdmin Table 组件如何使用?" - UI components
+  - "如何编写 PHPUnit 测试?" - Testing patterns
+  - "GyListModel 验证规则?" - Model development
+
+  **When to use**: Any QSCMF backend development (CRUD, API, tests, migrations) in projects with QSCMF structure.
+---
+
+# QSCMF Backend Development
+
+## Mode Selection
+
+This skill operates in two modes based on user request:
+
+### Scaffold Mode (Code Generation)
+
+Triggers: "创建", "生成", "scaffold", "模块", "CRUD", "API"
+
+**Quick Start**:
+```markdown
+User: 创建 Product 模块，需要后台 CRUD 和 API
+
+AI Workflow:
+  1. Identify: Module=Product, Requirements=CRUD+API
+  2. Parse schema from migration or database
+  3. Infer field types using three-layer strategy
+  4. Generate code from templates
+  5. Write files to project directories
+  6. Output TODO list for manual steps
+```
+
+See [Scaffold Workflow](#scaffold-workflow) below.
+
+### Guide Mode (Development Guide)
+
+Default mode for QSCMF development questions.
+
+**Quick Start**:
+```markdown
+User: 如何实现 QsListController 的 CRUD？
+User: AntdAdmin Table 组件如何使用？
+User: 如何编写 PHPUnit 测试？
+```
+
+See [Framework Guide](#framework-guide) below.
+
+---
+
+## Scaffold Workflow
+
+### Step 1: Identify Requirements
+
+Extract from user request:
+- **Module name**: Product, User, Order, etc.
+- **Components needed**:
+  - Model? (GyListModel)
+  - AdminController? (QsListController + AntdAdmin)
+  - ApiController? (RestController)
+  - Migration? (Laravel Schema)
+  - Test? (PHPUnit)
+
+### Step 2: Parse Table Schema
+
+**Option A**: From Migration (preferred)
+```bash
+# Find migration file
+ls lara/database/migrations/*create_product*
+```
+
+**Option B**: Using script
+```bash
+php scripts/parse_schema.php qs_product
+```
+
+Output:
+```json
+{
+  "table": "qs_product",
+  "fields": [
+    {"name": "product_name", "type": "varchar(200)", "comment": "@title=产品名称;@type=text"},
+    {"name": "cover", "type": "int", "comment": "@title=封面图;@type=image"},
+    {"name": "status", "type": "tinyint", "comment": "@title=状态;@type=select"}
+  ]
+}
+```
+
+### Step 3: Infer Field Types
+
+Use three-layer inference:
+
+**Layer 1**: Configuration
+```yaml
+# .claude/qscmf/field-rules.yaml
+product_content: ueditor
+*_date: date
+status: select
+cover: image
+```
+
+**Layer 2**: Learning from code
+```bash
+php scripts/infer_types.php --scan app/Admin/Controller/
+```
+
+**Layer 3**: Default rules
+```php
+// Field name suffix patterns
+*_content → ueditor
+*_date → date
+*_time → time
+*_id → select/foreign
+status → select
+cover → image
+file_id → file
+sort → number
+```
+
+### Step 4: Generate Code
+
+Use templates from `assets/templates/`:
+
+**Model Template** → `model.php.tpl`
+```php
+class {{MODEL_NAME}}Model extends GyListModel
+{
+    protected $_validate = [
+{{VALIDATE_RULES}}
+    ];
+}
+```
+
+**AdminController Template** → `admin_controller.php.tpl`
+```php
+class {{MODEL}}Controller extends QsListController
+{
+    public function index() {
+        $table = new Table();
+{{TABLE_COLUMNS}}
+        return $table->render();
+    }
+
+    protected function buildTableColumns($container) {
+        $container->text('{{FIELD_NAME}}', '{{FIELD_TITLE}}');
+    }
+}
+```
+
+**ApiController Template** → `api_controller.php.tpl`
+```php
+class {{MODEL}}Controller extends RestController
+{
+    public function gets(): Response {
+        // ...
+    }
+}
+```
+
+### Step 5: Write Files
+
+Rules:
+- ✅ Create new files
+- ❌ Skip existing files (unless --force confirmed)
+- 📁 Maintain proper directory structure
+
+File paths:
+```
+Model:          app/Common/Model/{{MODEL}}Model.class.php
+AdminController: app/Admin/Controller/{{MODEL}}Controller.class.php
+ApiController:  app/Api/Controller/{{MODEL}}Controller.class.php
+Migration:      lara/database/migrations/xxxx_create_{{table}}_table.php
+Test:           lara/tests/Feature/{{MODEL}}Test.php
+```
+
+### Step 6: Output TODO List
+
+```markdown
+✅ Generated files:
+  - app/Common/Model/ProductModel.class.php
+  - app/Admin/Controller/ProductController.class.php
+  - app/Api/Controller/ProductController.class.php
+
+📝 TODO (manual):
+  - [ ] Run migration: php artisan migrate
+  - [ ] Configure permissions in qs_node table
+  - [ ] Add validation rules in Model::$_validate
+  - [ ] Implement business logic (save, delete hooks)
+  - [ ] Add foreign key relationships
+  - [ ] Run tests: vendor/bin/phpunit
+
+📚 References:
+  - Admin Controllers: references/admin-controllers.md
+  - Testing Guide: references/development-standards.md
+```
+
+---
+
+## Framework Guide
+
+### Quick Reference
+
+#### Standard CRUD Module
+
+```php
+// 1. Migration (lara/database/migrations/)
+Schema::create('qs_demo', function (Blueprint $table) {
+    $table->id();
+    $table->string('title', 200)->comment('标题');
+    $table->text('content')->nullable()->comment('内容');
+    $table->tinyInteger('status')->default(1)->comment('状态');
+    $table->timestamps();
+});
+
+// 2. Model (app/Common/Model/)
+class DemoModel extends GyListModel
+{
+    protected $_validate = [
+        ['title', 'require', '标题不能为空', self::MUST_VALIDATE],
+    ];
+}
+
+// 3. Controller (app/Admin/Controller/)
+class DemoController extends QsListController
+{
+    // See references/admin-controllers.md for full code
+}
+```
+
+#### RESTful API
+
+```php
+namespace Api\Controller;
+
+use Qscmf\Api\RestController;
+use QscmfApiCommon\Cache\Response;
+
+class DemoController extends RestController
+{
+    protected $noAuthorization = ['gets', 'detail'];
+
+    public function gets(): Response
+    {
+        $get_data = I('get.');
+        // ...
+        return new Response('成功', 1, $data);
+    }
+}
+```
+
+See [API Controllers](references/api-controllers.md).
+
+#### Unit Testing
+
+```php
+namespace Lara\Tests\Feature;
+
+use Lara\Tests\TestCase;
+
+class DemoTest extends TestCase
+{
+    public function testGetList(): void
+    {
+        $response = $this->get('/api.php/Demo/gets');
+        $response->assertStatus(200)->assertJson(['status' => 1]);
+    }
+
+    public function testWithMock(): void
+    {
+        $mock = $this->createMock(ApiService::class);
+        $mock->method('fetch')->willReturn(['success' => true]);
+        app()->instance(ApiService::class, $mock);
+
+        $result = D('Demo')->processData(123);
+        $this->assertTrue($result);
+    }
+}
+```
+
+See [Development Standards](references/development-standards.md).
+
+---
+
+### Common Code Patterns
+
+#### AntdAdmin Components
+
+**Table 列类型**:
+```php
+// 基础列类型
+$container->text('title', '标题');
+$container->textarea('content', '内容');
+$container->select('status', '状态')->setValueEnum(DBCont::getStatusList());
+$container->date('create_time', '创建时间')->setSearch(false);
+$container->datetime('update_time', '更新时间');
+$container->number('price', '价格');
+$container->image('cover', '封面图');
+$container->images('gallery', '图片集');
+$container->file('attachment', '附件');
+$container->link('url', '链接');
+$container->tags('tags', '标签');
+$container->boolean('is_active', '是否激活');
+$container->progress('progress', '进度');
+
+// 列配置方法
+->setSearch(true)              // 显示搜索框
+->setSearch(false)             // 隐藏搜索框
+->setSortable(true)            // 允许排序
+->setSortable(false)           // 禁止排序
+->editable()                   // 行内编辑
+->setWidth(200)                // 设置列宽
+->setShowCondition('status', 'eq', 1)  // 条件显示
+->setValueEnum([1=>'启用', 0=>'禁用'])  // 枚举值
+->setRender(function($value, $row) {    // 自定义渲染
+    return "<a href='{$value}'>链接</a>";
+})
+```
+
+**Form 表单字段类型**:
+```php
+// 基础字段
+$columns->text('title', '标题');
+$columns->textarea('summary', '摘要');
+$columns->number('sort', '排序');
+$columns->price('price', '价格');
+$columns->select('status', '状态')->setValueEnum(DBCont::getStatusList());
+$columns->radio('type', '类型')->setValueEnum([1=>'类型A', 2=>'类型B']);
+$columns->checkbox('tags', '标签')->setValueEnum(['tag1', 'tag2', 'tag3']);
+$columns->date('publish_date', '发布日期');
+$columns->datetime('create_time', '创建时间');
+$columns->time('open_time', '开放时间');
+$columns->color('theme_color', '主题色');
+
+// 文件上传字段
+$columns->image('cover_id', '封面图')
+    ->setUploadRequest(FormItem\ObjectStorage\Lib\Common::genItemDataUrl('image'))
+    ->setCrop('866/490');  // 裁剪比例
+
+$columns->images('gallery_ids', '图片集')
+    ->setUploadRequest(FormItem\ObjectStorage\Lib\Common::genItemDataUrl('image'))
+    ->setLimit(9);  // 最多9张
+
+$columns->file('file_id', '附件')
+    ->setUploadRequest(FormItem\ObjectStorage\Lib\Common::genItemDataUrl('file'))
+    ->setFileExt(['pdf', 'doc', 'docx', 'xls', 'xlsx']);
+
+$columns->ueditor('content', '详情内容')->setFormItemWidth(24);
+
+// 关联字段
+$columns->select('cate_id', '分类')
+    ->setValueEnum(D('Cate')->getField('id,name'))
+    ->addRule(new Required());
+
+$columns->select('user_id', '用户')
+    ->setSelectOptions(\Qscmf\Lib\DBCont::getUserOptions());
+
+// 字段配置方法
+->addRule(new Required())      // 必填
+->setFormItemWidth(24)         // 表单宽度 (24=100%, 12=50%)
+->setPlaceholder('请输入...')   // 占位符
+->setHelp('帮助提示文本')      // 帮助文本
+->setDefaultValue(1)           // 默认值
+->setDisabled(true)            // 禁用
+->setReadOnly(true)            // 只读
+->setFormItemColNumber(12)     // 栅格列数
+```
+
+**Modal 弹窗模式**:
+```php
+// 编辑弹窗
+$actions->edit()->modal(
+    (new \AntdAdmin\Component\Modal\Modal())
+        ->setTitle('编辑用户')
+        ->setWidth(800)
+        ->setForm($this->buildEditFormColumns(...))
+);
+
+// 自定义弹窗
+$actions->custom('自定义操作')->modal(
+    (new \AntdAdmin\Component\Modal\Modal())
+        ->setTitle('自定义操作')
+        ->setTemplate('<div>自定义内容</div>')
+);
+```
+
+#### Table Columns (ListBuilder 旧版兼容)
+
+```php
+// 适用于旧版 ListBuilder
+$builder = new \Qscmf\Builder\ListBuilder();
+
+$builder->setMetaTitle('用户列表')
+        ->addTopButton('addnew')
+        ->addTopButton('forbid')
+        ->addTopButton('resume')
+
+        // 搜索项
+        ->addSearchItem('keyword', 'text', '搜索')
+        ->addSearchItem('status', 'select', '状态', '', DBCont::getStatusList())
+
+        // 表格列
+        ->addTableColumn('id', 'ID')
+        ->addTableColumn('nick_name', '用户名')
+        ->addTableColumn('email', '邮箱')
+        ->addTableColumn('status', '状态', DBCont::getStatusList())
+
+        // 操作按钮
+        ->addRightButton('edit')
+        ->addRightButton('delete')
+
+        ->build();
+```
+
+#### Form Fields (FormBuilder 旧版兼容)
+
+```php
+$builder = new \Qscmf\Builder\FormBuilder();
+
+$builder->setMetaTitle('新增用户')
+        ->addFormItem('nick_name', 'text', '用户名*', '', '', '', 'required')
+        ->addFormItem('email', 'text', '邮箱*')
+        ->addFormItem('telephone', 'text', '手机号')
+        ->addFormItem('pwd', 'password', '密码')
+        ->addFormItem('role', 'select', '用户组', '', $role_options)
+        ->addFormItem('avatar', 'image', '头像')
+        ->addFormItem('status', 'radio', '状态', '', DBCont::getStatusList())
+        ->build();
+```
+
+#### Form Fields
+
+```php
+$columns->text('title', '标题')
+    ->addRule(new Required())
+    ->setFormItemWidth(24);
+
+$columns->image('cover_id', '封面图')
+    ->setUploadRequest(FormItem\ObjectStorage\Lib\Common::genItemDataUrl('image'))
+    ->setCrop('866/490');
+
+$columns->ueditor('content', '详情内容')->setFormItemWidth(24);
+
+$columns->select('cate_id', '分类')
+    ->setValueEnum(D('Cate')->getField('id,name'))
+    ->addRule(new Required());
+```
+
+#### Database Constants
+
+```php
+use Gy_Library\DBCont;
+
+DBCont::NORMAL_STATUS      // = 1 (启用)
+DBCont::DISABLE_STATUS     // = 0 (禁用)
+DBCont::AUDIT_STATUS       // = 2 (待审核)
+
+\Qscmf\Lib\DBCont::getStatusList()    // [1 => '启用', 0 => '禁用']
+```
+
+#### PHP 8.2 Best Practices
+
+```php
+// ✅ Type declarations
+public function getUserById(int $id): ?array
+{
+    return $this->where(['id' => $id])->find();
+}
+
+// ✅ Strict comparison
+if ($status === DBCont::NORMAL_STATUS) { }
+
+// ✅ Arrow functions
+$ids = array_map(fn($item) => (int)$item['id'], $list);
+
+// ✅ Match expressions
+$type = match($field) {
+    'content' => 'ueditor',
+    'status' => 'select',
+    default => 'text'
+};
+```
+
+#### Search Condition Building
+
+```php
+// 多字段模糊搜索
+$keyword = I('keyword', '', 'string');
+$map['id|nick_name|email|telephone'] = array('like', '%' . $keyword . '%', '_multi' => true);
+
+// 状态筛选
+$status = I('status', -1, 'int');
+if ($status !== -1) {
+    $map['status'] = $status;
+}
+
+// 日期范围
+$startDate = I('start_date', '');
+$endDate = I('end_date', '');
+if ($startDate && $endDate) {
+    $map['create_time'] = array('between', [$startDate, $endDate]);
+}
+
+// 组合查询示例
+public function index($status = DBCont::NORMAL_STATUS) {
+    $map = $this->buildSearchMap();
+
+    $list = D('User')
+        ->where($map)
+        ->order('id desc')
+        ->select();
+
+    $this->assign('list', $list);
+    $this->display();
+}
+
+protected function buildSearchMap(): array {
+    $map = [];
+
+    // 关键词搜索
+    $keyword = I('keyword', '');
+    if ($keyword) {
+        $map['id|nick_name|email'] = array('like', '%' . $keyword . '%', '_multi' => true);
+    }
+
+    // 状态筛选
+    $status = I('status', -1, 'int');
+    if ($status !== -1) {
+        $map['status'] = $status;
+    }
+
+    // 时间范围
+    $startTime = I('start_time', '');
+    $endTime = I('end_time', '');
+    if ($startTime && $endTime) {
+        $map['create_time'] = ['between', [$startTime, $endTime]];
+    }
+
+    return $map;
+}
+```
+
+#### CLI Controller Pattern
+
+```php
+if (!IS_CLI) die('The file can only be run in cli mode!');
+
+class SyncController extends CliModeHelperController
+{
+    private const BATCH_SIZE = 50;
+
+    public function __construct()
+    {
+        parent::__construct('sync_log');
+    }
+
+    public function run()
+    {
+        try {
+            $stats = $this->processBatch();
+            $this->printStats($stats);
+            return 0;
+        } catch (\Exception $e) {
+            $this->writeErrorLog('[ERROR] ' . $e->getMessage(), true);
+            return 1;
+        }
+    }
+
+    private function processBatch(): array
+    {
+        $stats = ['success' => 0, 'failed' => 0, 'total' => 0];
+        $pages = ceil($total / self::BATCH_SIZE);
+
+        for ($page = 1; $page <= $pages; $page++) {
+            $list = D('Model')->limit(self::BATCH_SIZE)->page($page)->select();
+            foreach ($list as $item) {
+                $result = $this->processOne($item);
+                $stats[$result['status']]++;
+            }
+            if ($page < $pages) sleep(1);
+        }
+        return $stats;
+    }
+
+    private function printStats(array $stats): void
+    {
+        $this->writeErrorLog("成功: {$stats['success']}, 失败: {$stats['failed']}", true);
+    }
+}
+```
+
+**Key Points:**
+- ✅ 强制 CLI 模式检查
+- ✅ 继承 `CliModeHelperController`
+- ✅ 分批处理避免内存溢出
+- ✅ 返回 0/1 表示执行结果
+
+---
+
+## Advanced Patterns
+
+### Redis Lock Pattern
+
+```php
+use Gy_Library\RedisLock;
+
+// 防止并发执行
+public function save($id = null) {
+    $lock_key = 'product_save_' . ($id ?? 'new');
+
+    $lock = new RedisLock($lock_key, 10); // 10秒超时
+
+    if (!$lock->acquire()) {
+        $this->error('操作频繁，请稍后再试');
+    }
+
+    try {
+        // 业务逻辑
+        $result = parent::save($id);
+
+        $lock->release();
+        return $result;
+    } catch (\Exception $e) {
+        $lock->release();
+        throw $e;
+    }
+}
+```
+
+### Knowledge Store Sync Pattern
+
+```php
+// 在知识库同步中使用
+use Qscmf\Builder\FormBuilder;
+
+public function add() {
+    $form = new FormBuilder();
+
+    $form->addFormItem('title', 'text', '标题')
+         ->addFormItem('content', 'ueditor', '内容')
+
+         // 知识库字段配置
+         ->setKnowledgeStoreField('content', [
+             'title_field' => 'title',
+             'content_field' => 'content',
+             'category' => 'product',
+             'tags' => ['产品', '介绍']
+         ])
+         ->build();
+
+    $this->display($form);
+}
+```
+
+### Wall Class Pattern (External API)
+
+```php
+namespace App\Wall;
+
+use Gy_Library\RedisLock;
+
+class ExternalApiWall
+{
+    private string $baseUrl;
+    private string $apiKey;
+    private ?RedisLock $lock = null;
+
+    public function __construct(string $baseUrl, string $apiKey)
+    {
+        $this->baseUrl = rtrim($baseUrl, '/');
+        $this->apiKey = $apiKey;
+    }
+
+    /**
+     * 调用外部API
+     */
+    public function call(string $endpoint, array $data = [], string $method = 'GET'): array
+    {
+        $url = $this->baseUrl . '/' . ltrim($endpoint, '/');
+        $lockKey = md5($url . serialize($data));
+
+        // 使用Redis锁防止并发请求
+        $this->lock = new RedisLock('api_call_' . $lockKey, 5);
+        $this->lock->acquire();
+
+        try {
+            if ($method === 'GET') {
+                $response = (new \Gy_Library\GyHttpClient())->get($url, [
+                    'query' => $data,
+                    'headers' => ['Authorization' => 'Bearer ' . $this->apiKey]
+                ]);
+            } else {
+                $response = (new \Gy_Library\GyHttpClient())->post($url, [
+                    'json' => $data,
+                    'headers' => ['Authorization' => 'Bearer ' . $this->apiKey]
+                ]);
+            }
+
+            return $this->parseResponse($response);
+        } finally {
+            $this->lock->release();
+        }
+    }
+
+    private function parseResponse(array $response): array
+    {
+        if ($response['code'] !== 200) {
+            throw new \Exception('API调用失败: ' . ($response['message'] ?? 'Unknown error'));
+        }
+
+        return $response['data'] ?? [];
+    }
+
+    /**
+     * Mock接口（用于测试）
+     */
+    public static function mock(array $responseData): self
+    {
+        return new class($responseData) extends ExternalApiWall {
+            private array $data;
+
+            public function __construct(array $data)
+            {
+                parent::__construct('mock://', '');
+                $this->data = $data;
+            }
+
+            public function call(string $endpoint, array $data = [], string $method = 'GET'): array
+            {
+                return $this->data;
+            }
+        };
+    }
+}
+
+// 使用示例
+$api = new ExternalApiWall('https://api.example.com', 'your-api-key');
+$result = $api->call('/v1/users', ['page' => 1], 'GET');
+```
+
+### Queue Job Pattern
+
+```php
+// 创建队列Job
+namespace Lara\App\Jobs;
+
+use Qscmf\Queue\QueueJob;
+
+class SyncProductJob extends QueueJob
+{
+    private int $productId;
+
+    public function __construct(int $productId)
+    {
+        $this->productId = $productId;
+        $this->queue = 'product_sync';  // 队列名称
+    }
+
+    public function handle(): bool
+    {
+        $product = D('Product')->find($this->productId);
+
+        if (!$product) {
+            return false;
+        }
+
+        // 同步到第三方平台
+        $result = D('Sync')->syncProduct($product);
+
+        if ($result) {
+            D('Product')->save([
+                'id' => $this->productId,
+                'sync_status' => 1,
+                'sync_time' => time()
+            ]);
+        }
+
+        return $result;
+    }
+}
+
+// 推送任务到队列
+\Qscmf\Queue\Queue::push(
+    \Lara\App\Jobs\SyncProductJob::class,
+    ['productId' => $productId],
+    'product_sync'
+);
+```
+
+### File Upload Pattern
+
+```php
+namespace Api\Controller;
+
+use Think\Controller;
+
+class UploadController extends Controller
+{
+    // 上传前配置接口
+    public function upload() {
+        $get_data = I('get.');
+        $this->checkRequired($get_data, ['title', 'cate']);
+
+        // 构建上传配置
+        $upload_config = [
+            'title' => $get_data['title'],
+            'cate' => $get_data['cate'],
+            'file_ext' => $get_data['file_ext'] ?? 'jpg,png,gif,jpeg',
+            'file_size' => $get_data['file_size'] ?? 10 * 1024 * 1024, // 10MB
+        ];
+
+        $return_params = [
+            'title' => $upload_config['title'],
+            'cate' => $upload_config['cate'],
+        ];
+
+        $ajax = [
+            'status' => 0,
+            'server_url' => U("uploadFile", $return_params, false, true)
+        ];
+
+        $this->ajaxReturn($ajax);
+    }
+
+    // 文件上传接口
+    public function uploadFile() {
+        $title = I('get.title', '');
+        $cate = I('get.cate', '');
+
+        $upload_config = [
+            'save_path' => 'Uploads/' . $cate . '/' . date('Ymd') . '/',
+            'save_name' => ['uniqid', ''],
+            'exts' => ['jpg', 'png', 'gif', 'jpeg'],
+            'max_size' => 10 * 1024 * 1024, // 10MB
+            'sub_name' => ['date', 'Ymd'],
+        ];
+
+        $upload = new \Think\Upload($upload_config);
+        $info = $upload->uploadOne($_FILES['file']);
+
+        if (!$info) {
+            $this->ajaxReturn([
+                'status' => 1,
+                'message' => $upload->getError()
+            ]);
+        }
+
+        // 保存到附件表
+        $file_id = D('File')->add([
+            'title' => $title,
+            'file_path' => $info['savepath'] . $info['savename'],
+            'file_size' => $info['size'],
+            'file_ext' => $info['ext'],
+            'cate' => $cate,
+            'create_time' => time()
+        ]);
+
+        $this->ajaxReturn([
+            'status' => 0,
+            'message' => '上传成功',
+            'data' => [
+                'file_id' => $file_id,
+                'url' => $info['savepath'] . $info['savename']
+            ]
+        ]);
+    }
+
+    // 必填参数检查
+    protected function checkRequired(array $data, array $fields): void
+    {
+        foreach ($fields as $field) {
+            if (empty($data[$field])) {
+                $this->ajaxReturn([
+                    'status' => 1,
+                    'message' => "参数 {$field} 不能为空"
+                ]);
+            }
+        }
+    }
+}
+```
+
+---
+
+## Architecture Overview
+
+### Directory Structure
+
+```
+project_root/
+├── app/                    # ThinkPHP 应用层
+│   ├── Admin/             # 后台模块 (管理界面)
+│   │   ├── Controller/    # 后台控制器
+│   │   ├── Conf/          # 后台配置
+│   │   └── View/          # 后台视图
+│   ├── Home/              # 前台模块
+│   ├── Api/               # API模块 (RESTful接口)
+│   │   └── Controller/    # API控制器
+│   ├── Common/            # 公共模块
+│   │   ├── Model/         # 模型层 (GyListModel)
+│   │   ├── Conf/          # 公共配置
+│   │   └── Common.php     # 公共函数
+│   ├── Gy_Library/        # 核心扩展库
+│   │   ├── GyListModel.php       # 基础模型
+│   │   ├── GyListController.php  # 基础控制器
+│   │   ├── DBCont.php            # 数据库常量
+│   │   ├── RedisLock.php         # Redis锁
+│   │   └── CliModeHelperController.php  # CLI辅助
+│   ├── Addons/            # 插件系统
+│   ├── Behaviors/         # 行为扩展
+│   ├── Runtime/           # 运行时缓存
+│   ├── Tpl/               # 模板目录
+│   └── Uploads/           # 上传目录
+├── lara/                  # Laravel 集成层
+│   ├── app/               # Laravel应用
+│   ├── config/            # Laravel配置
+│   ├── database/          # 数据库迁移
+│   │   └── migrations/    # Schema文件
+│   └── tests/             # PHPUnit测试
+│       ├── Feature/       # 功能测试
+│       ├── Browser/       # 浏览器测试
+│       └── TestCase.php   # 测试基类
+├── www/                   # Web入口目录
+│   └── index.php          # 主入口
+├── vendor/                # Composer依赖
+│   └── quansitech/        # QSCMF核心包
+│       ├── qscmf/         # 框架核心
+│       └── antd-admin/   # AntdAdmin组件库
+└── resources/             # 前端资源
+```
+
+### Hybrid Framework
+
+**ThinkPHP Layer** (`app/`):
+- 业务逻辑层、控制器、模型
+- 使用 `D('ModelName')` 调用模型
+- 使用 `M()` 进行原始表操作
+- 路由格式：`/module/controller/action`
+
+**Laravel Layer** (`lara/`):
+- 数据库迁移 (Schema Builder)
+- 依赖注入容器
+- PHPUnit 测试框架
+- 队列系统 (Redis驱动)
+
+### Core Components
+
+| Component | Base Class | Location | Purpose |
+|-----------|-----------|----------|---------|
+| Admin Controller | `QsListController` | `app/Admin/Controller/` | CRUD管理界面 |
+| API Controller | `RestController` | `app/Api/Controller/` | RESTful API |
+| Model | `GyListModel` | `app/Common/Model/` | 数据访问层 |
+| CLI Controller | `CliModeHelperController` | Any module | 命令行任务 |
+| Queue Job | | `lara/app/Jobs/` | 异步任务 |
+
+### Framework Features
+
+**RBAC 权限系统**:
+```php
+// 节点权限表结构
+qs_node          # 权限节点
+qs_role_user     # 用户角色关联
+qs_access        # 角色权限关联
+
+// 权限检查节点格式
+Admin/User/index       # 用户列表
+Admin/User/add         # 新增用户
+Admin/User/save        # 保存用户
+```
+
+**插件系统**:
+```php
+// 插件目录结构
+Addons/
+├── PluginName/
+│   ├── PluginName.class.php    # 插件入口
+│   ├── controller/             # 插件控制器
+│   ├── model/                  # 插件模型
+│   └── config.php              # 插件配置
+
+// 插件调用
+D('Addons')->addonExecute('PluginName', 'action', $params);
+```
+
+**队列系统**:
+```bash
+# 启动队列Worker
+QUEUE_ENV=prod QUEUE_COUNT=1 php app/queue_resque.php
+
+# 推送任务到队列
+\Qscmf\Queue\Queue::push($job_class, $args, $queue_name);
+```
+
+### Development Mode Decision Tree
+
+```
+What feature do you need?
+│
+├─ Admin CRUD
+│  ├─ Simple CRUD? → Standard CRUD (QsListController + AntdAdmin)
+│  └─ Multiple similar modules? → Abstract Base pattern
+│
+├─ RESTful API
+│  └─ API Controller pattern (RestController)
+│
+├─ Complex Business Logic
+│  ├─ Batch operations? → Custom controller + RedisLock
+│  ├─ Async tasks? → Queue + Job
+│  └─ External API? → Wall class + Mock testing
+│
+└─ Frontend Page
+   └─ HomeController + Inertia.js + React/TS
+```
+
+---
+
+## Common Commands
+
+```bash
+# Database
+php artisan make:migration create_table_name
+php artisan migrate
+php artisan migrate:rollback
+php artisan migrate:fresh --seed
+
+# ThinkPHP CLI
+php www/index.php <module>/<controller>/<action>
+php www/index.php Admin/User/index
+
+# Testing
+vendor/bin/phpunit                           # 运行所有测试
+vendor/bin/phpunit tests/Feature/UserTest    # 运行单个测试文件
+vendor/bin/phpunit --filter testAdd         # 运行特定测试方法
+
+# Queue
+QUEUE_ENV=prod QUEUE_COUNT=1 php app/queue_resque.php
+
+# Cache
+php think clear --cache                      # 清除缓存
+php think clear --temp                       # 清除临时文件
+
+# Database Schema
+php artisan schema:dump                      # 导出数据库结构
+```
+
+## Best Practices Summary
+
+### 1. Security
+
+```php
+// ✅ 使用 I() 函数过滤输入
+$keyword = I('keyword', '', 'string');
+$id = I('get.id', 0, 'int');
+
+// ✅ SQL注入防护 - 使用参数绑定
+$result = D('User')->where(['id' => $id])->find();
+
+// ✅ XSS防护 - 输出时转义
+{$vo.title|htmlspecialchars}
+
+// ✅ CSRF防护 - 表单Token
+<input type="hidden" name="__hash__" value="{:session('__HASH__')}">
+
+// ❌ 避免直接拼接SQL
+$sql = "SELECT * FROM user WHERE id = $id";  // 危险！
+```
+
+### 2. Performance
+
+```php
+// ✅ 批量操作
+foreach ($chunks as $chunk) {
+    D('User')->addAll($chunk);
+}
+
+// ✅ 使用缓存
+S('cache_key', $data, 3600);  // 缓存1小时
+$data = S('cache_key');        // 读取缓存
+
+// ✅ 避免N+1查询
+$list = D('Product')
+    ->join('LEFT JOIN qs_cate ON qs_product.cate_id = qs_cate.id')
+    ->field('qs_product.*, qs_cate.name as cate_name')
+    ->select();
+
+// ✅ 分页
+$Page = new \Think\Page($total, 20);
+$show = $Page->show();
+$list = D('User')->limit($Page->firstRow . ',' . $Page->listRows)->select();
+```
+
+### 3. Error Handling
+
+```php
+// ✅ 使用try-catch
+try {
+    $result = D('User')->save($data);
+} catch (\Exception $e) {
+    E('操作失败: ' . $e->getMessage());
+}
+
+// ✅ 日志记录
+\Think\Log::record('错误信息', 'ERR');
+\Think\Log::record('调试信息', 'DEBUG');
+
+// ✅ 返回标准错误格式
+$this->ajaxReturn([
+    'status' => 1,
+    'message' => '操作失败',
+    'data' => []
+]);
+```
+
+### 4. Code Organization
+
+```php
+// ✅ 模型封装业务逻辑
+class UserModel extends GyListModel
+{
+    // 获取用户角色
+    public function getUserRole(int $userId): array
+    {
+        return $this->join('__ROLE_USER__ ON __USER__.id = __ROLE_USER__.user_id')
+            ->join('__ROLE__ ON __ROLE_USER__.role_id = __ROLE__.id')
+            ->where(['qs_user.id' => $userId])
+            ->field('qs_role.*')
+            ->select();
+    }
+
+    // 检查用户名是否存在
+    public function isNickNameExists(string $nickName, int $excludeId = 0): bool
+    {
+        $map = ['nick_name' => $nickName];
+        if ($excludeId > 0) {
+            $map['id'] = ['neq', $excludeId];
+        }
+        return (bool)$this->where($map)->count();
+    }
+}
+```
+
+### 5. Configuration
+
+```php
+// ✅ 环境变量使用
+$dbHost = env('DB_HOST', 'localhost');
+$dbPort = env('DB_PORT', 3306);
+
+// ✅ 配置文件读取
+$uploadConfig = C('UPLOAD_CONFIG_QINIU');
+$maxSize = C('UPLOAD_MAX_SIZE');
+
+// ✅ 模块配置
+$moduleConfig = C('MODULE_ALIAS');
+```
+
+## Debugging Tips
+
+### 开启调试模式
+
+```php
+// app/Common/Conf/debug.php
+return [
+    'SHOW_PAGE_TRACE' => true,
+    'SHOW_ERROR_MSG' => true,
+    'LOG_RECORD' => true,
+    'SQL_DEBUG_LOG' => true,
+];
+```
+
+### 常用调试方法
+
+```php
+// 打印变量
+dump($var);
+print_r($var);
+var_dump($var);
+
+// 输出最后执行的SQL
+echo D('User')->getLastSql();
+
+// 记录日志到文件
+\Think\Log::record('调试信息', 'INFO');
+
+// 返回SQL执行信息（开发环境）
+$ajax = [
+    'sql' => D('User')->getLastSql(),
+    'data' => $result
+];
+```
+
+### 常见问题排查
+
+```php
+// 问题：数据没有保存
+// 检查验证规则
+protected $_validate = [
+    ['field', 'require', '提示信息']
+];
+
+// 问题：SQL查询慢
+// 添加索引
+// Schema::table('qs_user')->index('email');
+
+// 问题：内存溢出
+// 使用分批处理
+$total = D('User')->count();
+$batchSize = 100;
+for ($i = 0; $i < $total; $i += $batchSize) {
+    $list = D('User')->limit($batchSize)->page($i / $batchSize + 1)->select();
+    // 处理数据
+}
+```
+
+---
+
+## References
+
+Detailed guides in `references/`:
+
+### Core Guides
+
+- **[Admin Controllers](references/admin-controllers.md)** - Admin controller guide
+  - Standard CRUD pattern
+  - Abstract base class pattern
+  - Table/Form configuration
+  - Knowledge store sync
+  - Redis lock usage
+
+- **[API Controllers](references/api-controllers.md)** - API controller guide
+  - RestController base class
+  - Authentication & authorization
+  - Response handling
+  - Pagination & filtering
+  - Data formatting
+
+- **[CRUD Patterns](references/crud-patterns.md)** - Development patterns
+  - Mode selection decision tree
+  - Field type configuration
+  - Validation rules
+  - Business logic encapsulation
+  - Performance optimization
+  - Concurrency control
+
+- **[Model Guide](references/model-guide.md)** - 模型开发指南
+  - GyListModel 代码规范
+  - 验证规则
+  - 查询方法封装
+  - 性能优化（N+1、缓存）
+  - 状态变更逻辑
+  - 完整模型示例
+
+- **[Migration Guide](references/migration-guide.md)** - 数据库迁移指南
+  - 迁移命令
+  - 列类型和修饰符
+  - 元数据注释系统
+  - 枚举列表
+  - 索引设计
+  - 表结构规范
+
+- **[Where Query Reference](references/where-query-reference.md)** - 查询语法参考
+  - Where 条件表达式
+  - 聚合查询
+  - JOIN 关联
+  - 排序和分页
+
+- **[Development Standards](references/development-standards.md)** - Standards & testing
+  - PHP 8.2 coding standards
+  - React/TypeScript standards
+  - Caching & locking
+  - Unit testing guide
+  - Mock third-party APIs
+  - Wall class pattern
+  - Code review checklist
+
+### Architecture Patterns
+
+- **[Abstract Base Patterns](references/abstract-base-patterns.md)** - 抽象基类模式
+  - 分类模块模式 (ACate/ACateModel)
+  - 内容模块模式 (AContent/AContentModel)
+  - 标签模块模式 (ATag/ATagModel)
+  - 自定义扩展策略
+
+- **[Migration Metadata](references/migration-metadata.md)** - 迁移文件元数据系统
+  - 元数据属性和字段类型映射
+  - 代码生成规则
+  - 枚举列表系统
+  - 命名规范和最佳实践

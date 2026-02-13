@@ -1,0 +1,616 @@
+# QSCMF v13 Configuration
+
+version: "13"
+php_requirement: ">=8.2"
+phpunit_version: "^9.3.0"
+
+dependencies:
+  think-core: "^13.0"
+
+admin_ui: "legacy_jquery"
+jquery_version: "1.x"
+features:
+  antd_admin: false
+  refactored_upload: false
+  legacy_table_builder: true
+
+# Field type mappings (learned from studying qscmf-curd-generator)
+# These map @type annotations to FormBuilder components
+field_types:
+  # Basic input types
+  text:
+    component: "text"
+    description: "单行文本输入框"
+    form_item: "text"
+    list_column: "text"
+    validation: ["length", "require"]
+
+  textarea:
+    component: "textarea"
+    description: "多行文本域"
+    form_item: "textarea"
+    list_column: "textarea"
+    validation: ["length", "require"]
+
+  # Selection types
+  select:
+    component: "select"
+    description: "下拉选择框 (外键或 DBCont)"
+    form_item: "select"
+    list_column: "type"
+    validation: ["in", "require"]
+    requires_metadata: ["table", "show"] | ["list"]
+    examples:
+      - # Foreign key mode
+        annotation: '@type=select;@table=qs_category;@show=title;'
+        description: "关联分类表"
+      - # DBCont mode
+        annotation: '@type=select;@list=status;'
+        description: "使用 DBCont::$_status"
+
+  radio:
+    component: "radio"
+    description: "单选按钮组"
+    form_item: "radio"
+    list_column: "type"
+    validation: ["in", "require"]
+    requires_metadata: ["list"]
+
+  checkbox:
+    component: "checkbox"
+    description: "复选框组"
+    form_item: "checkbox"
+    list_column: "type"
+    validation: ["array"]
+    requires_metadata: ["list"]
+
+  # Date/Time types
+  date:
+    component: "date"
+    description: "日期选择器"
+    form_item: "date"
+    list_column: "date"
+    validation: ["date"]
+    supports_save: true
+
+  time:
+    component: "time"
+    description: "时间选择器"
+    form_item: "time"
+    list_column: "time"
+    validation: ["time"]
+
+  datetime:
+    component: "datetime"
+    description: "日期时间选择器"
+    form_item: "datetime"
+    list_column: "datetime"
+    validation: ["datetime"]
+
+  # File/Image types
+  file:
+    component: "file"
+    description: "单文件上传"
+    form_item: "file"
+    list_column: "picture"
+    validation: ["file"]
+
+  files:
+    component: "files"
+    description: "多文件上传"
+    form_item: "files"
+    list_column: "pictures"
+    validation: ["array"]
+
+  picture:
+    component: "picture"
+    description: "单图片上传"
+    form_item: "picture"
+    list_column: "picture"
+    validation: ["image"]
+
+  pictures:
+    component: "pictures"
+    description: "多图片上传"
+    form_item: "pictures"
+    list_column: "pictures"
+    validation: ["array"]
+
+  # Special types
+  richText:
+    component: "ueditor"
+    description: "富文本编辑器 (UEditor)"
+    form_item: "ueditor"
+    list_column: "textarea"
+    validation: ["require"]
+    supports_oss: true
+    annotation_variants:
+      - '@type=richText;'           # 默认 imageproxy
+      - '@type=richText;@oss=true'  # 使用 OSS
+
+  status:
+    component: "status"
+    description: "状态选择 (启用/禁用)"
+    form_item: "select"
+    list_column: "status"
+    validation: ["in"]
+    requires_metadata: ["list"]
+    default_list: "status"
+    note: "1=启用, 0=禁用"
+
+  url:
+    component: "url"
+    description: "网址输入框"
+    form_item: "text"
+    list_column: "a"
+    validation: ["url"]
+    supports_save: true
+
+  phone:
+    component: "phone"
+    description: "手机号输入框"
+    form_item: "text"
+    list_column: "text"
+    validation: ["regex", "phone"]
+    supports_save: true
+    regex: "/^1[3-9]\d{9}$/"
+
+  email:
+    component: "email"
+    description: "邮箱输入框"
+    form_item: "text"
+    list_column: "text"
+    validation: ["email"]
+    supports_save: true
+
+  district:
+    component: "district"
+    description: "中国省市区选择器"
+    form_item: "district"
+    list_column: "text"
+    validation: ["integer"]
+
+  num:
+    component: "number"
+    description: "数字输入框"
+    form_item: "num"
+    list_column: "num"
+    validation: ["number", "between"]
+    supports_save: true
+
+# Field name suffix patterns for auto-inference
+field_patterns:
+  "*_content":
+    type: "richText"
+    priority: 90
+
+  "*_desc":
+    type: "textarea"
+    priority: 80
+
+  "*_remark":
+    type: "textarea"
+    priority: 80
+
+  "*_summary":
+    type: "textarea"
+    priority: 80
+
+  "*_date":
+    type: "date"
+    priority: 95
+
+  "*_time":
+    type: "time"
+    priority: 95
+
+  "*_at":
+    type: "datetime"
+    priority: 95
+
+  "status":
+    type: "status"
+    priority: 100
+
+  "*_status":
+    type: "select"
+    priority: 85
+    metadata: ["@list=status"]
+
+  "is_*":
+    type: "radio"
+    priority: 85
+    metadata: ["@list=boolStatus"]
+
+  "has_*":
+    type: "radio"
+    priority: 85
+    metadata: ["@list=boolStatus"]
+
+  "*_id":
+    type: "select"
+    priority: 90
+    note: "Foreign key - requires table scanning"
+
+  "cate_id":
+    type: "select"
+    priority: 95
+    note: "Category foreign key"
+
+  "user_id":
+    type: "select"
+    priority: 95
+    note: "User foreign key"
+
+  "cover":
+    type: "picture"
+    priority: 90
+
+  "cover_id":
+    type: "picture"
+    priority: 90
+
+  "*_image":
+    type: "picture"
+    priority: 85
+
+  "*_images":
+    type: "pictures"
+    priority: 85
+
+  "file_id":
+    type: "file"
+    priority: 90
+
+  "*_file":
+    type: "file"
+    priority: 80
+
+  "*_files":
+    type: "files"
+    priority: 80
+
+  "sort":
+    type: "num"
+    priority: 90
+
+  "*_sort":
+    type: "num"
+    priority: 85
+
+  "*_count":
+    type: "num"
+    priority: 85
+
+  "*_price":
+    type: "num"
+    priority: 90
+
+  "*_amount":
+    type: "num"
+    priority: 90
+
+  "url":
+    type: "url"
+    priority: 90
+
+  "*_url":
+    type: "url"
+    priority: 85
+
+  "link":
+    type: "url"
+    priority: 85
+
+  "*_link":
+    type: "url"
+    priority: 80
+
+  "phone":
+    type: "phone"
+    priority: 90
+
+  "mobile":
+    type: "phone"
+    priority: 90
+
+  "tel":
+    type: "phone"
+    priority: 90
+
+  "email":
+    type: "email"
+    priority: 95
+
+  "*_email":
+    type: "email"
+    priority: 90
+
+  "address":
+    type: "district"
+    priority: 85
+
+  "*_address":
+    type: "district"
+    priority: 80
+
+# @metadata annotation attributes
+metadata_attributes:
+  title:
+    type: "string"
+    required: true
+    description: "字段显示标题"
+    example: "@title=发布时间;"
+
+  type:
+    type: "string"
+    required: true
+    description: "字段类型 (见 field_types)"
+    example: "@type=date;"
+
+  table:
+    type: "string"
+    required: false
+    description: "关联表名 (用于 @type=select)"
+    applies_to: ["select"]
+    example: "@table=qs_category;"
+
+  show:
+    type: "string"
+    required: false
+    description: "关联表显示字段 (用于 @type=select)"
+    applies_to: ["select"]
+    example: "@show=title;"
+
+  list:
+    type: "string"
+    required: false
+    description: "DBCont 变量名 (status, boolStatus, custom)"
+    applies_to: ["select", "radio", "checkbox", "status"]
+    example: "@list=status;"
+
+  length:
+    type: "string"
+    required: false
+    description: "长度限制 (最小,最大)"
+    format: "min,max"
+    example: "@length=1,200;"
+
+  save:
+    type: "boolean"
+    required: false
+    description: "是否在列表页面支持快速修改"
+    applies_to: ["text", "url", "phone", "email", "num", "select", "date", "textarea"]
+    example: "@save=true;"
+
+  require:
+    type: "boolean"
+    required: false
+    description: "是否必填"
+    example: "@require=true;"
+
+  oss:
+    type: "boolean"
+    required: false
+    description: "是否使用 OSS 存储 (用于 @type=richText)"
+    applies_to: ["richText"]
+    example: "@oss=true;"
+
+# ListBuilder column types (v13)
+listbuilder_column_types:
+  text:
+    description: "普通文本列"
+    usage: "$builder->addTableColumn('name', '名称');"
+
+  status:
+    description: "状态列 (带枚举映射)"
+    usage: "$builder->addTableColumn('status', '状态', DBCont::getStatusList());"
+
+  icon:
+    description: "图标列"
+    usage: "$builder->addTableColumn('icon', '图标');"
+
+  date:
+    description: "日期列"
+    usage: "$builder->addTableColumn('create_time', '创建时间');"
+
+  time:
+    description: "时间列"
+    usage: "$builder->addTableColumn('update_time', '更新时间');"
+
+  picture:
+    description: "单图片列"
+    usage: "$builder->addTableColumn('cover', '封面图');"
+
+  pictures:
+    description: "多图片列"
+    usage: "$builder->addTableColumn('images', '图片集');"
+
+  type:
+    description: "类型映射列"
+    usage: "$builder->addTableColumn('type', '类型', $type_list);"
+
+  fun:
+    description: "自定义函数列"
+    usage: "$builder->addTableColumn('custom', '自定义', 'fun', function($v, $row) { return $v; });"
+
+  a:
+    description: "链接列"
+    usage: "$builder->addTableColumn('url', '链接', 'a');"
+
+  self:
+    description: "自引用列"
+    usage: "$builder->addTableColumn('parent_id', '父级', 'self');"
+
+  num:
+    description: "数字列"
+    usage: "$builder->addTableColumn('sort', '排序', 'num');"
+
+  checkbox:
+    description: "复选框列"
+    usage: "$builder->addTableColumn('is_top', '置顶');"
+
+  select:
+    description: "下拉选择列"
+    usage: "$builder->addTableColumn('cate_id', '分类', $cate_list);"
+
+  select2:
+    description: "增强下拉选择列"
+    usage: "$builder->addTableColumn('tag_id', '标签', $tag_list, 'select2');"
+
+  textarea:
+    description: "多文本列"
+    usage: "$builder->addTableColumn('summary', '摘要', 'textarea');"
+
+# ListBuilder search types (v13)
+listbuilder_search_types:
+  text:
+    description: "文本搜索"
+    usage: "$builder->addSearchItem('keyword', 'text', '搜索关键词');"
+
+  select:
+    description: "下拉搜索"
+    usage: "$builder->addSearchItem('status', 'select', '状态', '', DBCont::getStatusList());"
+
+  date:
+    description: "日期搜索"
+    usage: "$builder->addSearchItem('create_date', 'date', '创建时间');"
+
+  time:
+    description: "时间搜索"
+    usage: "$builder->addSearchItem('start_time', 'time', '开始时间');"
+
+  datetime:
+    description: "日期时间搜索"
+    usage: "$builder->addSearchItem('publish_time', 'datetime', '发布时间');"
+
+  between:
+    description: "范围搜索"
+    usage: "$builder->addSearchItem('price', 'between', '价格范围');"
+
+  checkbox:
+    description: "复选框搜索"
+    usage: "$builder->addSearchItem('business_type', 'checkbox', '业务类型', '', $options);"
+
+# ListBuilder button types (v13)
+listbuilder_top_buttons:
+  addnew:
+    description: "新增按钮"
+    usage: "$builder->addTopButton('addnew');"
+
+  forbid:
+    description: "禁用按钮"
+    usage: "$builder->addTopButton('forbid');"
+
+  resume:
+    description: "启用按钮"
+    usage: "$builder->addTopButton('resume');"
+
+  delete:
+    description: "删除按钮"
+    usage: "$builder->addTopButton('delete');"
+
+  custom:
+    description: "自定义按钮"
+    usage: "$builder->addTopButton('custom', ['title' => '导出', 'href' => U('export')]);"
+
+listbuilder_right_buttons:
+  edit:
+    description: "编辑按钮"
+    usage: "$builder->addRightButton('edit');"
+
+  delete:
+    description: "删除按钮"
+    usage: "$builder->addRightButton('delete');"
+
+  forbid:
+    description: "禁用按钮"
+    usage: "$builder->addRightButton('forbid');"
+
+  resume:
+    description: "启用按钮"
+    usage: "$builder->addRightButton('resume');"
+
+  custom:
+    description: "自定义按钮"
+    usage: "$builder->addRightButton('custom', ['title' => '审核', 'href' => U('audit', ['id' => '__id__'])]);"
+
+# DBCont common lists
+dbcont_lists:
+  status:
+    class: "DBCont"
+    property: "_status"
+    values:
+      1: "启用"
+      0: "禁用"
+
+  boolStatus:
+    class: "DBCont"
+    property: "_bool_status"
+    values:
+      1: "是"
+      0: "否"
+
+# Validation rule mappings
+validation_rules:
+  require:
+    model: "require"
+    form_item: "Required"
+    description: "必填验证"
+
+  length:
+    model: "length"
+    form_item: "Length"
+    description: "长度验证"
+    format: "min,max"
+
+  email:
+    model: "email"
+    form_item: "Email"
+    description: "邮箱验证"
+
+  url:
+    model: "url"
+    form_item: "Url"
+    description: "URL验证"
+
+  number:
+    model: "number"
+    form_item: "Number"
+    description: "数字验证"
+
+  regex:
+    model: "regex"
+    form_item: "Regex"
+    description: "正则验证"
+
+  phone:
+    model: "regex"
+    form_item: "Regex"
+    description: "手机号验证"
+    pattern: "/^1[3-9]\d{9}$/"
+
+  date:
+    model: "date"
+    form_item: "Date"
+    description: "日期验证"
+
+  datetime:
+    model: "datetime"
+    form_item: "DateTime"
+    description: "日期时间验证"
+
+  in:
+    model: "in"
+    form_item: "In"
+    description: "值范围验证"
+
+  unique:
+    model: "unique"
+    form_item: "Unique"
+    description: "唯一性验证"
+
+  callback:
+    model: "callback"
+    form_item: "Callback"
+    description: "自定义回调验证"

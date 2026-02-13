@@ -1,0 +1,74 @@
+# Scaffold Code Generation Test Scenario
+name: "代码生成测试"
+description: "从迁移元数据生成完整 CRUD 代码"
+query: "生成 Product CRUD 代码"
+user_intent: "用户希望从已有的迁移文件生成 Model、Controller、API、Test"
+
+expected_tools:
+  - "scaffold/scaffold-generate-code.md"
+  - "scaffold/scaffold-parse-metadata.md"
+  - "scaffold/scaffold-infer-types.md"
+  - "scaffold/scaffold-migration-first.md"
+
+complexity: "complex"
+
+metrics:
+  max_tokens: 3000
+  max_files: 10
+  min_clarity: 0.9
+
+expected_response_patterns:
+  - "migration"
+  - "ProductModel"
+  - "ProductController"
+  - "metadata"
+  - "@type"
+  - "@title"
+
+validation_criteria:
+  - "应首先检查迁移文件是否存在"
+  - "应解析 @metadata 注解"
+  - "应根据版本 (v13/v14) 生成正确的代码"
+  - "应生成 Model、Controller、API、Test 文件"
+  - "应输出 TODO 列表"
+
+prerequisites:
+  - "迁移文件存在且包含 @metadata"
+  - "已检测到 QSCMF 版本"
+
+test_data:
+  migration_file: |
+    Schema::create('qs_product', function (Blueprint $table) {
+        $table->id();
+        $table->string('name', 200)->comment('@title=产品名称;@type=text;@length=1,200;@require=true;');
+        $table->decimal('price', 10, 2)->comment('@title=价格;@type=num;@require=true;');
+        $table->unsignedBigInteger('category_id')->comment('@title=分类;@type=select;@table=category;@show=title;');
+        $table->tinyInteger('status')->default(1)->comment('@title=状态;@type=status;@list=status;');
+        $table->timestamps();
+    });
+
+expected_outputs:
+  files:
+    - "app/Common/Model/ProductModel.class.php"
+    - "app/Admin/Controller/ProductController.class.php"
+    - "app/Api/Controller/ProductController.class.php"
+    - "lara/tests/Feature/ProductTest.php"
+
+  v14_patterns:
+    - "$container->text('name', '名称')"
+    - "$container->select('status', '状态')"
+    - "->setSearch(true)"
+    - "->setValueEnum"
+
+  v13_patterns:
+    - "$builder->addTableColumn('name', '名称')"
+    - "$builder->addFormItem('name', 'text', '名称')"
+    - "DBCont::getStatusList()"
+
+error_scenarios:
+  - description: "迁移文件不存在"
+    response: "应提示先创建迁移文件"
+  - description: "缺少 @metadata"
+    response: "应提示添加 @metadata 注解"
+  - description: "版本未知"
+    response: "应提示指定版本或检测版本"

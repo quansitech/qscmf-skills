@@ -1,0 +1,25 @@
+# Simple Search Configuration Test Scenario
+name: "Simple Search Configuration"
+description: "User wants to add search functionality to a table"
+query: "如何配置 Table 的搜索功能？"
+user_intent: "用户想了解一个具体功能"
+
+expected_tools:
+  - "crud/crud-search-basic.md"
+
+complexity: "simple"
+
+metrics:
+  max_tokens: 1000
+  max_files: 3
+  min_clarity: 0.9
+
+expected_response_patterns:
+  - "setSearch"
+  - "setSearchType"
+  - "like"
+
+validation_criteria:
+  - "Should reference setSearch(true) method"
+  - "Should mention search type options"
+  - "Should provide code example"

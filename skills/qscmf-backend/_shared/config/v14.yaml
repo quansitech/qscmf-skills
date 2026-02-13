@@ -1,0 +1,626 @@
+# QSCMF v14 Configuration
+
+version: "14"
+php_requirement: ">=8.2"
+phpunit_version: "^10.0"
+
+dependencies:
+  think-core: "^14.0"
+  antd-admin: "^1.0"
+
+admin_ui: "antd_admin"
+jquery_version: "3.x"
+features:
+  antd_admin: true
+  refactored_upload: true
+  legacy_table_builder: false
+
+# Field type mappings for v14 (AntdAdmin)
+# These map @type annotations to AntdAdmin FormItem components
+field_types:
+  # Basic input types
+  text:
+    component: "text"
+    description: "单行文本输入框"
+    form_item: "text"
+    list_column: "text"
+    validation: ["length", "require"]
+    v14_features:
+      - setPlaceholder
+      - setFormItemWidth
+      - setTips
+
+  textarea:
+    component: "textarea"
+    description: "多行文本域"
+    form_item: "textarea"
+    list_column: "text"
+    validation: ["length", "require"]
+    v14_features:
+      - setRows
+      - setFormItemWidth
+      - setTips
+
+  # Selection types
+  select:
+    component: "select"
+    description: "下拉选择框 (外键或 DBCont)"
+    form_item: "select"
+    list_column: "select"
+    validation: ["in", "require"]
+    requires_metadata: ["table", "show"] | ["list"]
+    v14_features:
+      - setValueEnum
+      - setPlaceholder
+      - setFormItemWidth
+      - setAsync
+      - setAsyncUrl
+    examples:
+      - # Foreign key mode
+        annotation: '@type=select;@table=qs_category;@show=title;'
+        description: "关联分类表"
+      - # DBCont mode
+        annotation: '@type=select;@list=status;'
+        description: "使用 DBCont::$_status"
+
+  radio:
+    component: "radio"
+    description: "单选按钮组"
+    form_item: "radio"
+    list_column: "select"
+    validation: ["in", "require"]
+    requires_metadata: ["list"]
+    v14_features:
+      - setValueEnum
+      - setFormItemWidth
+
+  checkbox:
+    component: "checkbox"
+    description: "复选框组"
+    form_item: "checkbox"
+    list_column: "select"
+    validation: ["array"]
+    requires_metadata: ["list"]
+    v14_features:
+      - setValueEnum
+      - setFormItemWidth
+
+  # Date/Time types
+  date:
+    component: "date"
+    description: "日期选择器"
+    form_item: "date"
+    list_column: "date"
+    validation: ["date"]
+    supports_save: true
+    v14_features:
+      - setPicker
+      - setFormat
+      - setSearchType
+
+  datetime:
+    component: "datetime"
+    description: "日期时间选择器"
+    form_item: "datetime"
+    list_column: "date"
+    validation: ["datetime"]
+    v14_features:
+      - setPicker
+      - setFormat
+      - setSearchType
+
+  time:
+    component: "time"
+    description: "时间选择器"
+    form_item: "time"
+    list_column: "date"
+    validation: ["time"]
+    v14_features:
+      - setPicker
+      - setFormat
+
+  # File/Image types (v14 refactored upload system)
+  file:
+    component: "file"
+    description: "单文件上传 (重构版)"
+    form_item: "file"
+    list_column: "text"
+    validation: ["file"]
+    v14_features:
+      - setUploadRequest
+      - setMaxSize
+      - setAccept
+
+  files:
+    component: "files"
+    description: "多文件上传 (重构版)"
+    form_item: "files"
+    list_column: "text"
+    validation: ["array"]
+    v14_features:
+      - setUploadRequest
+      - setMaxSize
+      - setMaxCount
+      - setAccept
+
+  picture:
+    component: "picture"
+    description: "单图片上传 (重构版)"
+    form_item: "image"
+    list_column: "image"
+    validation: ["image"]
+    v14_features:
+      - setUploadRequest
+      - setMaxSize
+      - setCrop
+      - setAspectRatio
+
+  pictures:
+    component: "pictures"
+    description: "多图片上传 (重构版)"
+    form_item: "images"
+    list_column: "image"
+    validation: ["array"]
+    v14_features:
+      - setUploadRequest
+      - setMaxSize
+      - setMaxCount
+      - setCrop
+      - setAspectRatio
+
+  # Special types
+  richText:
+    component: "antd_rich_editor"
+    description: "富文本编辑器 (Antd Rich Text Editor)"
+    form_item: "rich_text"
+    list_column: "text"
+    validation: ["require"]
+    supports_oss: true
+    v14_features:
+      - setUploadRequest
+      - setFormItemWidth
+      - setHeight
+    annotation_variants:
+      - '@type=richText;'           # 默认
+      - '@type=richText;@oss=true'  # 使用 OSS
+
+  status:
+    component: "status"
+    description: "状态选择 (启用/禁用) - Antd Switch"
+    form_item: "select"
+    list_column: "select"
+    validation: ["in"]
+    requires_metadata: ["list"]
+    default_list: "status"
+    note: "1=启用, 0=禁用"
+    v14_features:
+      - setValueEnum
+      - setBadge
+
+  url:
+    component: "url"
+    description: "网址输入框"
+    form_item: "text"
+    list_column: "text"
+    validation: ["url"]
+    supports_save: true
+    v14_features:
+      - setPlaceholder
+      - setFormItemWidth
+
+  phone:
+    component: "phone"
+    description: "手机号输入框"
+    form_item: "text"
+    list_column: "text"
+    validation: ["regex", "phone"]
+    supports_save: true
+    regex: "/^1[3-9]\d{9}$/"
+    v14_features:
+      - setPlaceholder
+      - setFormItemWidth
+
+  email:
+    component: "email"
+    description: "邮箱输入框"
+    form_item: "text"
+    list_column: "text"
+    validation: ["email"]
+    supports_save: true
+    v14_features:
+      - setPlaceholder
+      - setFormItemWidth
+
+  district:
+    component: "district"
+    description: "中国省市区选择器"
+    form_item: "district"
+    list_column: "text"
+    validation: ["integer"]
+    v14_features:
+      - setLevel
+      - setFormItemWidth
+
+  num:
+    component: "number"
+    description: "数字输入框"
+    form_item: "number"
+    list_column: "text"
+    validation: ["number", "between"]
+    supports_save: true
+    v14_features:
+      - setMin
+      - setMax
+      - setStep
+      - setFormItemWidth
+
+# AntdAdmin Table column methods (v14)
+antd_table_columns:
+  text:
+    method: "text"
+    description: "普通文本列"
+    list_column: "text"
+    features:
+      - setSearch
+      - setSearchType
+      - setSortable
+      - setWidth
+      - setEllipsis
+      - setShowCondition
+      - setSearchPlaceholder
+      - setSearchDefault
+    example: |
+      $container->text('name', '名称')
+          ->setSearch(true)
+          ->setSearchType('like')
+          ->setSortable(true)
+          ->setWidth(200)
+          ->setEllipsis(true);
+
+  select:
+    method: "select"
+    description: "下拉选择列"
+    list_column: "select"
+    features:
+      - setValueEnum
+      - setSearch
+      - setSearchType
+      - setBadge
+      - setWidth
+      - setShowCondition
+    example: |
+      $container->select('status', '状态')
+          ->setValueEnum(DBCont::getStatusList())
+          ->setBadge([1 => 'success', 0 => 'default'])
+          ->setSearch(true)
+          ->setSearchType('exact');
+
+  date:
+    method: "date"
+    description: "日期列"
+    list_column: "date"
+    features:
+      - setSearch
+      - setSearchType
+      - setFormat
+      - setWidth
+      - setShowCondition
+    example: |
+      $container->date('create_time', '创建时间')
+          ->setSearch(true)
+          ->setSearchType('between')
+          ->setFormat('Y-m-d H:i:s');
+
+  image:
+    method: "image"
+    description: "图片列"
+    list_column: "image"
+    features:
+      - setWidth
+      - setHeight
+      - setShowCondition
+    example: |
+      $container->image('cover', '封面')
+          ->setWidth(100)
+          ->setHeight(60);
+
+  action:
+    method: "action"
+    description: "操作列"
+    list_column: "action"
+    features:
+      - setParams
+      - actions
+    example: |
+      $container->action('', '操作')
+          ->setParams(['id' => 'id'])
+          ->actions(function ($actions) {
+              $actions->edit();
+              $actions->delete();
+          });
+
+  custom:
+    method: "custom"
+    description: "自定义列"
+    list_column: "custom"
+    features:
+      - setRenderer
+      - setSearch
+      - setSortable
+      - setWidth
+      - setShowCondition
+    example: |
+      $container->custom('status', '状态')
+          ->setRenderer(function($value, $row) {
+              return React::render('Badge', [
+                  'status' => $value,
+                  'text' => $value === 1 ? '启用' : '禁用'
+              ]);
+          });
+
+# AntdAdmin advanced features
+antd_features:
+  custom_renderers:
+    description: "React 自定义渲染器"
+    example: |
+      ->setRenderer(function($value, $row) {
+          return React::render('Component', ['prop' => $value]);
+      })
+
+  inline_editing:
+    description: "内联编辑"
+    example: |
+      ->editable()
+
+  batch_actions:
+    description: "批量操作"
+    example: |
+      ->setBatchActions([
+          'delete' => '批量删除',
+          'enable' => '批量启用'
+      ])
+
+  advanced_filters:
+    description: "高级筛选"
+    example: |
+      ->setAdvancedFilter([
+          'status' => 'select',
+          'date_range' => 'between'
+      ])
+
+  async_data:
+    description: "异步数据加载"
+    example: |
+      ->setAsync(true)
+      ->setAsyncUrl('/api/getOptions')
+
+# v14 configuration methods
+configuration_methods:
+  setSearch:
+    signature: "setSearch(bool $enable)"
+    description: "显示/隐藏搜索框"
+    default: true
+
+  setSearchType:
+    signature: "setSearchType(string $type)"
+    description: "搜索类型"
+    values:
+      like: "模糊搜索"
+      exact: "精确搜索"
+      between: "范围搜索"
+
+  setSortable:
+    signature: "setSortable(bool $enable)"
+    description: "允许/禁止排序"
+    default: false
+
+  setWidth:
+    signature: "setWidth(int $width)"
+    description: "列宽度"
+
+  setEllipsis:
+    signature: "setEllipsis(bool $enable)"
+    description: "文本溢出省略"
+    default: false
+
+  setShowCondition:
+    signature: "setShowCondition(string $field, string $op, mixed $value)"
+    description: "条件显示"
+    example: "->setShowCondition('status', 'eq', 1)"
+
+  setValueEnum:
+    signature: "setValueEnum(array $enum)"
+    description: "枚举值映射"
+    example: "->setValueEnum([1 => '启用', 0 => '禁用'])"
+
+  setRenderer:
+    signature: "setRenderer(callable $renderer)"
+    description: "自定义渲染器"
+
+  setBadge:
+    signature: "setBadge(array $map)"
+    description: "状态徽章配置"
+    example: "->setBadge([1 => 'success', 0 => 'default'])"
+
+  setSearchPlaceholder:
+    signature: "setSearchPlaceholder(string $text)"
+    description: "搜索框提示文字"
+
+  setSearchDefault:
+    signature: "setSearchDefault(array $value)"
+    description: "默认搜索值"
+
+  editable:
+    signature: "editable()"
+    description: "启用内联编辑"
+
+  setFormItemWidth:
+    signature: "setFormItemWidth(string $width)"
+    description: "表单项宽度"
+
+  setUploadRequest:
+    signature: "setUploadRequest(callable $request)"
+    description: "自定义上传请求"
+
+  setMaxSize:
+    signature: "setMaxSize(int $size)"
+    description: "最大文件大小 (MB)"
+
+  setMaxCount:
+    signature: "setMaxCount(int $count)"
+    description: "最大文件数量"
+
+  setCrop:
+    signature: "setCrop(bool $enable)"
+    description: "启用裁剪"
+
+  setAspectRatio:
+    signature: "setAspectRatio(float $ratio)"
+    description: "裁剪比例"
+
+  setAsync:
+    signature: "setAsync(bool $enable)"
+    description: "异步加载"
+
+  setAsyncUrl:
+    signature: "setAsyncUrl(string $url)"
+    description: "异步加载 URL"
+
+  setPlaceholder:
+    signature: "setPlaceholder(string $text)"
+    description: "占位符文字"
+
+  setTips:
+    signature: "setTips(string $text)"
+    description: "提示文字"
+
+  setRows:
+    signature: "setRows(int $rows)"
+    description: "文本域行数"
+
+  setFormat:
+    signature: "setFormat(string $format)"
+    description: "日期格式"
+
+  setPicker:
+    signature: "setPicker(string $picker)"
+    description: "选择器类型"
+    values:
+      date: "日期"
+      week: "周"
+      month: "月"
+      quarter: "季度"
+      year: "年"
+      datetime: "日期时间"
+
+  setMin:
+    signature: "setMin(float $min)"
+    description: "最小值"
+
+  setMax:
+    signature: "setMax(float $max)"
+    description: "最大值"
+
+  setStep:
+    signature: "setStep(float $step)"
+    description: "步长"
+
+  setLevel:
+    signature: "setLevel(int $level)"
+    description: "地区选择器级别"
+    values:
+      1: "省"
+      2: "省市"
+      3: "省市区"
+
+  setHeight:
+    signature: "setHeight(string $height)"
+    description: "高度"
+
+  setParams:
+    signature: "setParams(array $params)"
+    description: "操作参数"
+
+  actions:
+    signature: "actions(callable $actions)"
+    description: "操作按钮配置"
+
+  setBatchActions:
+    signature: "setBatchActions(array $actions)"
+    description: "批量操作"
+
+  setAdvancedFilter:
+    signature: "setAdvancedFilter(array $filter)"
+    description: "高级筛选配置"
+
+# v14 vs v13 key differences
+version_differences:
+  architecture:
+    v13: "Legacy jQuery-based ListBuilder"
+    v14: "Modern AntdAdmin component-based"
+
+  ui_framework:
+    v13: "jQuery 1.x + Traditional UI"
+    v14: "React + Ant Design"
+
+  table_api:
+    v13: "$builder->addTableColumn()"
+    v14: "$container->text(), $container->select()"
+
+  form_api:
+    v13: "$builder->addFormItem()"
+    v14: "$container->text(), $container->select()"
+
+  rich_text:
+    v13: "UEditor"
+    v14: "Antd Rich Text Editor"
+
+  upload:
+    v13: "Traditional upload"
+    v14: "Refactored upload system"
+
+  custom_renderers:
+    v13: "'fun' type with callback"
+    v14: "React components via setRenderer"
+
+  inline_edit:
+    v13: "Limited support via @save=true"
+    v14: "Full support via editable()"
+
+  search_types:
+    v13: "text, select, date, time, datetime, between, checkbox"
+    v14: "Extended with like, exact, between modes"
+
+  performance:
+    v13: "DOM manipulation based"
+    v14: "Virtual DOM, better performance"
+
+# Migration considerations
+migration_guide:
+  addTableColumn_to_text:
+    v13: "$builder->addTableColumn('name', '名称');"
+    v14: "$container->text('name', '名称');"
+
+  addTableColumn_status:
+    v13: "$builder->addTableColumn('status', '状态', DBCont::getStatusList());"
+    v14: "$container->select('status', '状态')->setValueEnum(DBCont::getStatusList());"
+
+  addTableColumn_date:
+    v13: "$builder->addTableColumn('create_time', '创建时间');"
+    v14: "$container->date('create_time', '创建时间');"
+
+  addFormItem_to_text:
+    v13: "$builder->addFormItem('name', 'text', '名称');"
+    v14: "$container->text('name', '名称');"
+
+  addFormItem_select:
+    v13: "$builder->addFormItem('cate_id', 'select', '分类', $options);"
+    v14: "$container->select('cate_id', '分类')->setValueEnum($options);"
+
+  ueditor_to_rich_text:
+    v13: "$builder->addFormItem('content', 'ueditor', '内容');"
+    v14: "$container->rich_text('content', '内容');"
+
+  picture_upload:
+    v13: "$builder->addFormItem('cover', 'picture', '封面');"
+    v14: "$container->image('cover', '封面')->setUploadRequest($request);"

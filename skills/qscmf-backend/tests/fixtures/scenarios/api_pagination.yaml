@@ -1,0 +1,26 @@
+# API Pagination Test Scenario
+name: "API Pagination Implementation"
+description: "User wants to implement pagination in API"
+query: "API 如何实现分页？"
+user_intent: "用户想了解 API 分页实现"
+
+expected_tools:
+  - "api/api-pagination-cursor.md"
+  - "api/api-response-format.md"
+
+complexity: "medium"
+
+metrics:
+  max_tokens: 1200
+  max_files: 3
+  min_clarity: 0.9
+
+expected_response_patterns:
+  - "page"
+  - "page_size"
+  - "Response"
+
+validation_criteria:
+  - "Should reference pagination cursor pattern"
+  - "Should mention page/page_size parameters"
+  - "Should provide Response format"
