@@ -15,12 +15,13 @@ description: |
   **Operation Modes**:
   - Scaffold Mode: Code generation triggered by "创建", "生成", "scaffold", "CRUD"
   - Guide Mode: Development assistance for QSCMF questions
+  - Learning Mode: Capture knowledge via `/qscmf-learn` after sessions
 
   **Project Detection**: Activates when project contains app/ + lara/ directories.
 
   **Version Override**: Use "qscmf-backend v14 ..." or "qscmf-backend v13 ..." to force version.
 
-  Triggers: "创建", "生成", "CRUD", "API", "QsListController", "GyListModel"
+  Triggers: "创建", "生成", "CRUD", "API", "QsListController", "GyListModel", "/qscmf-learn", "/qscmf-backend"
 ---
 
 # QSCMF Backend Development
@@ -192,6 +193,56 @@ RED-GREEN-REFACTOR CYCLE
 ### Admin CRUD
 ```
 NO ADMIN CRUD WITHOUT MIGRATION METADATA FIRST
+```
+
+## Learning System
+
+After a QSCMF development session, capture learnings to improve this skill:
+
+### Trigger
+
+Invoke `/qscmf-learn` to analyze the conversation and propose improvements.
+
+### What It Does
+
+1. **Detects Version** - Reads composer.json or scans conversation context
+2. **Analyzes Conversation** - Scans entire history for QSCMF patterns, API usage, discoveries
+3. **Categorizes Learnings** - Maps to appropriate skill locations (patterns, APIs, field types, templates)
+4. **Groups by Risk** - Minor updates, new content, and modifications
+5. **Requires Confirmation** - You select which proposals to apply
+6. **Logs Changes** - Maintains traceability in `_shared/learn/log.yaml`
+
+### Learning Categories
+
+| Category | Target | Example |
+|----------|--------|---------|
+| **Pattern** | `rules/pattern/pattern-{name}.md` | Redis Lock for concurrent batches |
+| **API Usage** | `rules/{api}.md` or `references/{topic}.md` | TableContainer setDataSource() method |
+| **Field Type** | `rules/field-type-inference.md` | *_price fields → number input |
+| **Template** | `templates/{component}.php.tpl` | Export form boilerplate |
+| **Version Diff** | `_shared/references/migration-v*.md` | v14 Form validation differences |
+
+### Workflow Details
+
+→ See [Learning Workflow](_shared/learn/workflow.md) for complete implementation details
+
+### Example Usage
+
+```bash
+# After working on QSCMF code
+/qscmf-learn
+
+# Output:
+# Learning Proposals (3 items found)
+#
+# ### Minor Updates (1) - Batch Apply
+# - [x] Fix typo in pattern-redis-lock.md
+#
+# ### New Content (2) - Review & Confirm
+# - [ ] Field type rule: *_price → number
+# - [ ] API usage: TableContainer setDataSource()
+#
+# [Apply Minor] [Review Selected] [Cancel]
 ```
 
 ## Getting Started
