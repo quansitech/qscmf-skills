@@ -2,3 +2,8 @@
 # This file maintains traceability of all learnings captured via /qscmf-learn
 
 learnings: []
+
+# Correction tracking for /qscmf-learn
+# Records documentation issues detected and their resolution status
+corrections: []
+
