@@ -184,7 +184,7 @@ Use `Gy_Library\DBCont` for standard status values:
 use Gy_Library\DBCont;
 
 DBCont::NORMAL_STATUS    // = 1 (enabled)
-DBCont::DISABLE_STATUS   // = 0 (disabled)
+DBCont::FORBIDDEN_STATUS   // = 0 (disabled)
 DBCont::AUDIT_STATUS     // = 2 (pending review)
 
 DBCont::getStatusList()  // [1 => '启用', 0 => '禁用']

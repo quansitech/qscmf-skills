@@ -198,7 +198,7 @@ class StatusColumn extends BaseColumn
     {
         $this->setBadge([
             DBCont::NORMAL_STATUS => 'success',
-            DBCont::DISABLE_STATUS => 'default'
+            DBCont::FORBIDDEN_STATUS => 'default'
         ]);
         return $this;
     }

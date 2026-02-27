@@ -272,7 +272,7 @@ class {{MODEL}}Controller extends RestController
             return new Response('参数错误', 0);
         }
 
-        if (!in_array($status, [DBCont::NORMAL_STATUS, DBCont::DISABLE_STATUS])) {
+        if (!in_array($status, [DBCont::NORMAL_STATUS, DBCont::FORBIDDEN_STATUS])) {
             return new Response('状态值不正确', 0);
         }
 

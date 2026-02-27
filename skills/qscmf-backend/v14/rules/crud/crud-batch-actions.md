@@ -221,7 +221,7 @@ public function toggleStatus()
 
     $id_array = is_array($ids) ? $ids : explode(',', $ids);
     $status = ($type === 'forbid')
-        ? DBCont::DISABLE_STATUS
+        ? DBCont::FORBIDDEN_STATUS
         : DBCont::NORMAL_STATUS;
 
     $result = D('Product')->where(['id' => ['in', $id_array]])

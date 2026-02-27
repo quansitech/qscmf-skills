@@ -50,7 +50,7 @@ public function index()
 use Gy_Library\DBCont;
 
 DBCont::NORMAL_STATUS    // = 1
-DBCont::DISABLE_STATUS   // = 0
+DBCont::FORBIDDEN_STATUS   // = 0
 DBCont::getStatusList()  // [1 => '启用', 0 => '禁用']
 ```
 

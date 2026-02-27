@@ -371,7 +371,7 @@ use Gy_Library\DBCont;
  */
 public function forbid($ids): array
 {
-    return $this->changeStatus($ids, DBCont::NORMAL_STATUS, DBCont::DISABLE_STATUS);
+    return $this->changeStatus($ids, DBCont::NORMAL_STATUS, DBCont::FORBIDDEN_STATUS);
 }
 
 /**
@@ -379,7 +379,7 @@ public function forbid($ids): array
  */
 public function resume($ids): array
 {
-    return $this->changeStatus($ids, DBCont::DISABLE_STATUS, DBCont::NORMAL_STATUS);
+    return $this->changeStatus($ids, DBCont::FORBIDDEN_STATUS, DBCont::NORMAL_STATUS);
 }
 
 /**

@@ -83,7 +83,7 @@ use Gy_Library\DBCont;
 
 // Status values
 DBCont::NORMAL_STATUS   // = 1 (enabled)
-DBCont::DISABLE_STATUS  // = 0 (disabled)
+DBCont::FORBIDDEN_STATUS  // = 0 (disabled)
 DBCont::AUDIT_STATUS    // = 2 (pending review)
 ```
 

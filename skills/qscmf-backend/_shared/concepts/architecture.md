@@ -97,7 +97,7 @@ use Gy_Library\DBCont;
 
 // Status values
 DBCont::NORMAL_STATUS = 1;     // Enabled/Active
-DBCont::DISABLE_STATUS = 0;    // Disabled/Inactive
+DBCont::FORBIDDEN_STATUS = 0;    // Disabled/Inactive
 DBCont::AUDIT_STATUS = 2;      // Pending review
 DBCont::DELETE_STATUS = -1;    // Soft deleted
 

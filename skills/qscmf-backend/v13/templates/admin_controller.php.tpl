@@ -245,7 +245,7 @@ class {{MODEL}}Controller extends QsListController
      */
     public function toggleStatus($type, $ids)
     {
-        $targetStatus = ($type === 'forbid') ? DBCont::DISABLE_STATUS : DBCont::NORMAL_STATUS;
+        $targetStatus = ($type === 'forbid') ? DBCont::FORBIDDEN_STATUS : DBCont::NORMAL_STATUS;
 
         $id_array = is_array($ids) ? $ids : explode(',', $ids);
         $result = D('{{MODEL_NAME}}')->where(['id' => ['IN', $id_array]])->setField('status', $targetStatus);

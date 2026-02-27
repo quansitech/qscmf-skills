@@ -25,7 +25,7 @@ QSCMF version is detected from `composer.json` by reading `tiderjian/think-core`
 ### DBCont (Database Constants)
 Constants for common status values:
 - `DBCont::NORMAL_STATUS` = 1 (enabled/active)
-- `DBCont::DISABLE_STATUS` = 0 (disabled/inactive)
+- `DBCont::FORBIDDEN_STATUS` = 0 (disabled/inactive)
 - `DBCont::AUDIT_STATUS` = 2 (pending review)
 
 ### Migration Metadata

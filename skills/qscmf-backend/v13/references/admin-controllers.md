@@ -590,7 +590,7 @@ class ProductController extends QsListController
 use Gy_Library\DBCont;
 
 DBCont::NORMAL_STATUS    // = 1 (启用)
-DBCont::DISABLE_STATUS   // = 0 (禁用)
+DBCont::FORBIDDEN_STATUS   // = 0 (禁用)
 DBCont::AUDIT_STATUS     // = 2 (待审核)
 
 DBCont::getStatusList()  // [1 => '启用', 0 => '禁用']

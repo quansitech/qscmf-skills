@@ -437,7 +437,7 @@ public function batchAction(): Response
         case 'disable':
             $result = D($this->modelName)
                 ->where(['id' => ['in', $ids]])
-                ->save(['status' => DBCont::DISABLE_STATUS]);
+                ->save(['status' => DBCont::FORBIDDEN_STATUS]);
             break;
         default:
             return new Response('未知操作', 0);
@@ -454,7 +454,7 @@ public function statistics(): Response
     $stats = [
         'total' => D($this->modelName)->count(),
         'enabled' => D($this->modelName)->where(['status' => DBCont::NORMAL_STATUS])->count(),
-        'disabled' => D($this->modelName)->where(['status' => DBCont::DISABLE_STATUS])->count(),
+        'disabled' => D($this->modelName)->where(['status' => DBCont::FORBIDDEN_STATUS])->count(),
     ];
 
     return new Response('成功', 1, $stats);
@@ -567,7 +567,7 @@ public function upload(): Response
 use Gy_Library\DBCont;
 
 DBCont::NORMAL_STATUS    // = 1 (启用)
-DBCont::DISABLE_STATUS   // = 0 (禁用)
+DBCont::FORBIDDEN_STATUS   // = 0 (禁用)
 DBCont::AUDIT_STATUS     // = 2 (待审核)
 
 DBCont::getStatusList()  // [1 => '启用', 0 => '禁用']

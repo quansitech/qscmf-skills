@@ -313,7 +313,7 @@ class {{MODEL}}Test extends TestCase
         // Test disable
         $response = $this->post('/api.php/{{MODEL}}/toggleStatus', [
             'id' => $id,
-            'status' => DBCont::DISABLE_STATUS
+            'status' => DBCont::FORBIDDEN_STATUS
         ]);
 
         $response->assertStatus(200)
@@ -321,7 +321,7 @@ class {{MODEL}}Test extends TestCase
 
         // Verify status changed
         $record = DB::table($this->table)->find($id);
-        $this->assertEquals(DBCont::DISABLE_STATUS, $record->status);
+        $this->assertEquals(DBCont::FORBIDDEN_STATUS, $record->status);
 
         // Test enable
         $response = $this->post('/api.php/{{MODEL}}/toggleStatus', [
@@ -424,7 +424,7 @@ class {{MODEL}}Test extends TestCase
         $statusList = D('{{MODEL_NAME}}')->getStatusList();
         $this->assertIsArray($statusList);
         $this->assertArrayHasKey(DBCont::NORMAL_STATUS, $statusList);
-        $this->assertArrayHasKey(DBCont::DISABLE_STATUS, $statusList);
+        $this->assertArrayHasKey(DBCont::FORBIDDEN_STATUS, $statusList);
 
         // Test field options
         // $options = D('{{MODEL_NAME}}')->getFieldOptions();
@@ -449,7 +449,7 @@ class {{MODEL}}Test extends TestCase
 
         try {
             // Update record
-            DB::table($this->table)->where('id', $id)->update(['status' => DBCont::DISABLE_STATUS]);
+            DB::table($this->table)->where('id', $id)->update(['status' => DBCont::FORBIDDEN_STATUS]);
 
             // Simulate error
             throw new \Exception('Test exception');

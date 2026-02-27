@@ -252,7 +252,7 @@ class {{MODEL}}Controller extends GyListController
 
         $result = D($this->modelName)
             ->where(['id' => ['in', $ids]])
-            ->setField('status', DBCont::DISABLE_STATUS);
+            ->setField('status', DBCont::FORBIDDEN_STATUS);
 
         if ($result === false) {
             $this->error('操作失败');

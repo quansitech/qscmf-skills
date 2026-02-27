@@ -405,7 +405,7 @@ DBCont provides standard status and type constants for consistency.
 use Gy_Library\DBCont;
 
 DBCont::NORMAL_STATUS = 1;      // Active/Enabled
-DBCont::DISABLE_STATUS = 0;     // Inactive/Disabled
+DBCont::FORBIDDEN_STATUS = 0;     // Inactive/Disabled
 DBCont::AUDIT_STATUS = 2;       // Pending Review
 DBCont::DELETE_STATUS = -1;     // Soft Deleted
 ```
