@@ -1,13 +1,16 @@
 # QSCMF Deep Scan - Cache File Structure
 # Version: 1.0.0
 # Purpose: Store file hashes and extracted rules for incremental scanning
+#
+# Design Note: Uses concrete version numbers (v13, v14) for better LLM learning.
+# See llm-learning-principles.md for rationale.
 
 # Cache metadata
 metadata:
   version: "1.0.0"
   created_at: null
   last_updated: null
-  qscmf_version: null           # Detected QSCMF version (dynamically set)
+  qscmf_version: null           # Detected version: "v13" or "v14"
   codebase_root: null           # Path to the codebase being scanned
   last_full_scan: null          # Timestamp of last full scan
   schema_version: "1.0.0"       # Cache structure version
@@ -17,7 +20,7 @@ metadata:
 # Purpose: Track which files have been scanned and their extraction results
 files:
   # Example entry structure (populated during scan):
-  # {version}/rules/antdadmin.md:
+  # v14/rules/antdadmin.md:
   #   hash: "sha256:a1b2c3d4e5f6789..."
   #   size_bytes: 8192
   #   last_modified: "2025-02-26T15:30:00Z"
@@ -40,8 +43,10 @@ files:
 # Format: relative_path: sha256_hash
 file_hashes:
   # Version-specific files (populated on first scan)
-  # {version}/rules/**/*.md: hash...
-  # {version}/references/**/*.md: hash...
+  # v14/rules/**/*.md: hash...
+  # v14/references/**/*.md: hash...
+  # v13/rules/**/*.md: hash...
+  # v13/references/**/*.md: hash...
 
   # Shared files (always included)
   # _shared/references/*.md: hash...
@@ -52,8 +57,8 @@ file_hashes:
 rules_index:
   # Format: "document:rule_id" -> {document, type, line_start, apis}
   # Example:
-  # "{version}/rules/antdadmin.md:R001":
-  #   document: "{version}/rules/antdadmin.md"
+  # "v14/rules/antdadmin.md:R001":
+  #   document: "v14/rules/antdadmin.md"
   #   type: "code_example"
   #   line_start: 27
   #   apis:
@@ -65,8 +70,8 @@ rules_index:
 api_index:
   # Example:
   # "AntdAdmin\\Component\\Table::setMetaTitle":
-  #   - "{version}/rules/antdadmin.md:R001"
-  #   - "{version}/references/table-api.md:R003"
+  #   - "v14/rules/antdadmin.md:R001"
+  #   - "v14/references/table-api.md:R003"
 
 # Validation results cache (Phase 3 results)
 # Caches validation status for each API to avoid re-validation
@@ -85,7 +90,7 @@ validation_cache:
 scan_history:
   # - timestamp: "2025-02-27T10:00:00Z"
   #   trigger: "manual"                # manual | auto | scheduled
-  #   version: "{detected_version}"
+  #   version: "v14"
   #   files_scanned: 48
   #   rules_extracted: 156
   #   duration_seconds: 180

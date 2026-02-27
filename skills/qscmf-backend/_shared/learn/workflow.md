@@ -2,13 +2,15 @@
 
 Triggered by `/qscmf-learn` after a QSCMF development session.
 
+> **Design Note**: This workflow uses concrete version numbers (v13, v14) for better LLM learning efficiency. See [llm-learning-principles.md](./llm-learning-principles.md) for rationale.
+
 ## Step 1: Detect QSCMF Version
 
 1. Read `composer.json` for `tiderjian/think-core` version
-2. Fallback: scan conversation for rendering mode markers (Inertia.js/AntdAdmin → React mode, ListBuilder/jQuery → jQuery mode)
+2. Fallback: scan conversation for markers (Inertia.js/AntdAdmin → v14, ListBuilder/jQuery → v13)
 3. If uncertain, ask user
 
-**Output:** `$qscmfVersion`, `$basePath` = `skills/qscmf-backend/{version}/`
+**Output:** `$qscmfVersion` ("v13" or "v14"), `$basePath` = `skills/qscmf-backend/{version}/`
 
 ---
 
@@ -180,14 +182,15 @@ learnings:
     extracted_at: "2025-02-26T10:00:00Z"
     confidence: "high"
     type: "pattern"
-    target: "{version}/rules/pattern/pattern-redis-lock.md"
+    target: "v14/rules/pattern/pattern-redis-lock.md"
+    version: "v14"
     status: "applied"
 
 corrections:
   - id: "C001"
     type: "api-mismatch"
     confidence: "high"
-    target_file: "{version}/rules/api-controllers.md"
+    target_file: "v14/rules/api-controllers.md"
     target_line: 45
     evidence:
       dialogue_code: "$table->setDataSource()"
@@ -209,12 +212,13 @@ corrections:
 ### Key Principles
 
 1. **Version-first**: Detect version before analysis
-2. **Non-intrusive**: Post-hoc analysis
-3. **Always confirm**: No auto-apply
-4. **Idempotent**: Content hash prevents duplicates
-5. **Traceable**: All changes logged
-6. **Progressive verification**: Level 1-2 default, Level 3-4 opt-in
-7. **Evidence-based**: Corrections require dialogue evidence
+2. **Concrete versions**: Use v13/v14 (not abstract terms) for better LLM learning
+3. **Non-intrusive**: Post-hoc analysis
+4. **Always confirm**: No auto-apply
+5. **Idempotent**: Content hash prevents duplicates
+6. **Traceable**: All changes logged
+7. **Progressive verification**: Level 1-2 default, Level 3-4 opt-in
+8. **Evidence-based**: Corrections require dialogue evidence
 
 ### Correction vs Addition
 
@@ -232,3 +236,12 @@ corrections:
 | HIGH | ≥80 | Code evidence + User statement + Verification agree |
 | MEDIUM | 50-79 | Single evidence type OR partial verification |
 | LOW | <50 | Pattern match only, no direct evidence |
+
+---
+
+## Related Files
+
+- [version-mapping.yaml](./version-mapping.yaml) - Version detection and feature mapping
+- [llm-learning-principles.md](./llm-learning-principles.md) - Design decisions for LLM learning
+- [deep-scan-impl.md](./deep-scan-impl.md) - Deep scan implementation details
+- [cache.yaml](./cache.yaml) - Learning cache structure

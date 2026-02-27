@@ -1,9 +1,27 @@
 # QSCMF Learning Log
 # This file maintains traceability of all learnings captured via /qscmf-learn
+#
+# Design Note: Uses concrete version numbers (v13, v14) for better LLM learning.
+# See llm-learning-principles.md for rationale.
 
-learnings: []
+learnings:
+  - date: 2026-02-26
+    session: silent-login-integration
+    version: "v14"
+    category: correction
+    description: |
+      修复 API Response 文档中的错误：
+      1. status 是整数 (1/0)，不是布尔值
+      2. response() 方法输出字段是 'info'，不是 'msg'
+      3. Response 对象 toArray() 字段是 'message'
+      4. 添加 $noAuthorization 属性说明
+      5. 修正方法命名为 (gets, create, update, delete) 对应 (GET, POST, PUT, DELETE)
+    files_modified:
+      - "v14/rules/api/api-response-format.md"
+      - "v14/references/api-controllers.md"
+      - "v13/rules/api/api-response-format.md"
+      - "v13/references/api-controllers.md"
 
 # Correction tracking for /qscmf-learn
 # Records documentation issues detected and their resolution status
 corrections: []
-

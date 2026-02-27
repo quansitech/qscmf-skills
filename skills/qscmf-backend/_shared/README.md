@@ -18,9 +18,15 @@ _shared/
 │   ├── migration-metadata.md - Metadata system for code generation
 │   ├── abstract-base-patterns.md - Reusable base class patterns
 │   └── glossary.md         - Common terms and definitions
-└── learn/              - Learning system for knowledge capture
+└── learn/              # Learning system for knowledge capture
     ├── workflow.md         - Learning workflow details
-    └── deep-scan-impl.md   - Deep scan implementation
+    ├── deep-scan-impl.md   - Deep scan implementation
+    ├── version-mapping.yaml - Version detection and feature mapping
+    ├── llm-learning-principles.md - Design decisions for LLM learning
+    ├── cache.yaml          - Learning cache structure
+    ├── log.yaml            - Learning log
+    └── schema/             # Schema definitions
+        └── extracted_rules.yaml
 ```
 
 ## Key Reference Documentation
@@ -49,9 +55,11 @@ After a QSCMF development session, use `/qscmf-learn` to capture learnings:
 
 - **[workflow.md](learn/workflow.md)** - Complete learning workflow
 - **[deep-scan-impl.md](learn/deep-scan-impl.md)** - Deep scan implementation details
+- **[version-mapping.yaml](learn/version-mapping.yaml)** - Version detection and feature mapping
+- **[llm-learning-principles.md](learn/llm-learning-principles.md)** - Design decisions for LLM learning efficiency
 
 ## Getting Started
 
 1. Check the root [SKILL.md](../SKILL.md) for version detection
-2. Navigate to your version-specific SKILL.md
+2. Navigate to your version-specific SKILL.md (v13/ or v14/)
 3. Use shared references for cross-version concepts

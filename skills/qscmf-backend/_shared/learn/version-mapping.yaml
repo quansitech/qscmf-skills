@@ -1,0 +1,86 @@
+# QSCMF Version Mapping Configuration
+# Purpose: Centralized version-to-feature mapping for LLM learning efficiency
+#
+# Design Rationale:
+# - Use concrete version numbers (v13, v14) in learning content for better LLM comprehension
+# - This config provides the mapping for dynamic substitution when needed
+# - Adding new versions only requires updating this file, not all documents
+#
+# See: _shared/learn/llm-learning-principles.md for design decisions
+
+# Version detection from composer.json
+detection:
+  source: "composer.json"
+  package: "tiderjian/think-core"
+  mapping:
+    "^14.0": "v14"
+    "^13.0": "v13"
+  default: "v14"
+
+# Version-specific features
+features:
+  v14:
+    php_version: "8.2+"
+    phpunit: "^10.0"
+    rendering: "react"
+    primary_api: "AntdAdmin\\Component\\Table"
+    secondary_api: "Qscmf\\Builder\\ListBuilder"
+    frontend: "Inertia.js SPA"
+    traits:
+      - "HasLayoutProps"
+    headers:
+      - "X-Inertia"
+
+  v13:
+    php_version: "8.2"
+    phpunit: "^9.3.0"
+    rendering: "jquery"
+    primary_api: "Qscmf\\Builder\\ListBuilder"
+    secondary_api: null
+    frontend: "Traditional templates"
+    traits: []
+    headers: []
+
+# Rendering mode aliases (for human-readable references)
+rendering_modes:
+  react:
+    versions: ["v14"]
+    description: "React + Ant Design with Inertia.js"
+  jquery:
+    versions: ["v13"]
+    description: "jQuery + Bootstrap traditional rendering"
+
+# API mapping for quick reference
+api_mapping:
+  table:
+    v14: "AntdAdmin\\Component\\Table"
+    v13: "Qscmf\\Builder\\ListBuilder"
+  form:
+    v14: "AntdAdmin\\Component\\Form"
+    v13: "Qscmf\\Builder\\FormBuilder"
+
+# Method mapping (v13 -> v14 equivalent)
+method_mapping:
+  ListBuilder:
+    "addTableColumn(field, title)": "columns: container.text(field, title)"
+    "addTopButton(type, options)": "actions: container.button(title).modal()"
+    "addRightButton(type)": "action column: container.edit() / container.delete()"
+    "addSearchItem(field, type, label)": "columns: container.text(field).setSearch(true)"
+    "setTableDataList(data)": "setDataSource(data)"
+    "setTableDataPage(page)": "setPagination(new Pagination(...))"
+    "build()": "render()"
+
+# Learning content templates
+# Use {version} as placeholder, replaced at runtime with detected version
+templates:
+  rule_path: "{version}/rules/{category}/{name}.md"
+  reference_path: "{version}/references/{name}.md"
+  pattern_path: "{version}/rules/pattern/pattern-{name}.md"
+
+# Version constraint syntax for rules
+version_constraints:
+  ">=v14": "Applies to v14 and later versions"
+  ">=v13": "Applies to v13 and later versions"
+  "v13-only": "Only applies to v13 (legacy)"
+  "v14-only": "Only applies to v14 (not backward compatible)"
+  "all": "Applies to all versions"
