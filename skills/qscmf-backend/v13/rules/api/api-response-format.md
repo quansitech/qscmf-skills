@@ -36,10 +36,12 @@ return new Response('错误信息', 0);
 ```json
 {
     "status": 1,        // 1 = success, 0 = failure
-    "msg": "成功",       // Message
+    "message": "成功",   // Message (Response 对象)
     "data": {}          // Response data (nullable)
 }
 ```
+
+**注意**: `Response` 对象的 `toArray()` 输出字段是 `message`，不是 `msg` 或 `info`。
 
 ---
 

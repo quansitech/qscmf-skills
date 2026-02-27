@@ -43,17 +43,16 @@ class XxxController extends RestController
 
 ### 核心方法
 
-| 方法 | 说明 | HTTP 方法 |
-|------|------|-----------|
-| `gets()` | 列表查询 | GET |
-| `detail()` | 详情查询 | GET |
-| `save()` | 创建记录 | POST |
-| `update()` | 更新记录 | PUT |
-| `delete()` | 删除记录 | DELETE |
+| 方法 | 说明 | HTTP 方法 | 路径 |
+|------|------|-----------|------|
+| `gets()` | 列表/详情查询 | GET | /api/xxx |
+| `create()` | 创建记录 | POST | /api/xxx |
+| `update()` | 更新记录 | PUT | /api/xxx |
+| `delete()` | 删除记录 | DELETE | /api/xxx |
 
 ## 标准端点实现
 
-### GET 列表查询
+### GET 列表/详情查询
 
 ```php
 public function gets(): Response
@@ -77,28 +76,10 @@ public function gets(): Response
 }
 ```
 
-### GET 详情查询
-
-```php
-public function detail(): Response
-{
-    $id = I('get.id', 0, 'intval');
-
-    $data = D($this->modelName)->find($id);
-    if (!$data) {
-        return new Response('记录不存在', 0);
-    }
-
-    $data = $this->formatDetail($data);
-
-    return new Response('成功', 1, $data);
-}
-```
-
 ### POST 创建记录
 
 ```php
-public function save(): Response
+public function create(): Response
 {
     if (!IS_POST) {
         return new Response('请求方法错误', 0);
@@ -292,11 +273,22 @@ class ProductController extends RestController
     protected $modelName = 'Product';
 
     // 公开端点
-    protected $noAuthorization = ['gets', 'detail'];
+    protected $noAuthorization = ['gets'];
 
     public function gets(): Response
     {
         $get_data = I('get.');
+
+        // 如果有 id 参数，返回详情
+        if (!empty($get_data['id'])) {
+            $data = D($this->modelName)->find($get_data['id']);
+            if (!$data) {
+                return new Response('记录不存在', 0);
+            }
+            return new Response('成功', 1, $this->formatDetail($data));
+        }
+
+        // 否则返回列表
         $page = (int)($get_data['page'] ?? 1);
         $limit = (int)($get_data['limit'] ?? 10);
 
@@ -318,21 +310,7 @@ class ProductController extends RestController
         ]);
     }
 
-    public function detail(): Response
-    {
-        $id = I('get.id', 0, 'intval');
-
-        $data = D($this->modelName)->find($id);
-        if (!$data) {
-            return new Response('记录不存在', 0);
-        }
-
-        $data = $this->formatDetail($data);
-
-        return new Response('成功', 1, $data);
-    }
-
-    public function save(): Response
+    public function create(): Response
     {
         if (!IS_POST) {
             return new Response('请求方法错误', 0);
@@ -598,7 +576,7 @@ DBCont::getStatusList()  // [1 => '启用', 0 => '禁用']
 ### 2. 参数验证
 
 ```php
-public function save(): Response
+public function create(): Response
 {
     $data = I('post.');
 
@@ -641,7 +619,7 @@ $total_pages = ceil($total / $limit);
 
 ```php
 // 使用 try-catch 捕获异常
-public function save(): Response
+public function create(): Response
 {
     try {
         $data = I('post.');
