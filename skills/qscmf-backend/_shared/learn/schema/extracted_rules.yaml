@@ -1,0 +1,177 @@
+# QSCMF Deep Scan - Rule Extraction Output Schema
+# Version: 1.0.0
+# Purpose: Define the structure of extracted rules from documentation scanning
+
+---
+# Root document structure
+document: string()           # Relative path from skill root (e.g., "{version}/rules/antdadmin.md")
+file_hash: string()          # SHA256 hash of the file content
+extracted_at: timestamp()    # ISO 8601 timestamp
+schema_version: string()     # Schema version, e.g., "1.0.0"
+
+# Document metadata
+metadata:
+  doc_type: enum("rules", "references", "concepts", "shared")
+  word_count: integer()
+  code_block_count: integer()
+  api_count: integer()
+
+# Extracted rules list
+rules: list(rule())
+
+---
+# Rule type definition
+rule:
+  id: string()               # Unique ID within document (e.g., "R001")
+  type: enum("code_example", "api_signature", "config_ref", "best_practice", "pattern")
+  line_start: integer()      # Starting line number in source document
+  line_end: integer()        # Ending line number
+  content: string()          # Raw content (code block or text)
+
+  # API references (for code_example and api_signature types)
+  apis: list(api_ref())
+
+  # Configuration references (for config_ref type)
+  config_refs: list(config_ref())
+
+  # Best practice metadata (for best_practice type)
+  severity: enum("requirement", "recommendation", "warning", "deprecated")
+  version_constraint: string()  # e.g., ">=modern", "legacy-only"
+
+  # Tags for cross-cutting concerns
+  tags: list(string())
+
+---
+# API reference structure
+api_ref:
+  class: string()            # Fully qualified class name (e.g., "AntdAdmin\\Component\\Table")
+  method: string()           # Method name (e.g., "setMetaTitle")
+  params: list(param_def())  # Parameter definitions
+  return_type: string()      # Return type hint (e.g., "self", "void", "Column")
+  static: boolean()          # Whether this is a static method
+
+---
+# Parameter definition
+param_def:
+  name: string()             # Parameter name (e.g., "$title")
+  type: string()             # Type hint (e.g., "string", "callable", "array")
+  optional: boolean()        # Whether parameter is optional
+  default: any()             # Default value if optional
+
+---
+# Configuration reference
+config_ref:
+  key: string()              # Configuration key (e.g., "ADMIN_THEME")
+  context: string()          # Where it's used (e.g., "C() function call")
+  line: integer()            # Line number in document
+
+---
+# Example output structure
+
+example_output:
+  document: "{version}/rules/antdadmin.md"
+  file_hash: "sha256:a1b2c3d4e5f6..."
+  extracted_at: "2025-02-27T10:00:00Z"
+  schema_version: "1.0.0"
+
+  metadata:
+    doc_type: "rules"
+    word_count: 2500
+    code_block_count: 15
+    api_count: 45
+
+  rules:
+    - id: "R001"
+      type: "code_example"
+      line_start: 27
+      line_end: 41
+      content: |
+        $table = new Table();
+        $table->setMetaTitle('商品列表')
+            ->columns(function (Table\ColumnsContainer $container) {
+                $container->text('name', '商品名称');
+            });
+      apis:
+        - class: "AntdAdmin\\Component\\Table"
+          method: "__construct"
+          params: []
+          return_type: "Table"
+          static: false
+        - class: "AntdAdmin\\Component\\Table"
+          method: "setMetaTitle"
+          params:
+            - name: "$title"
+              type: "string"
+              optional: false
+          return_type: "self"
+          static: false
+        - class: "AntdAdmin\\Component\\Table"
+          method: "columns"
+          params:
+            - name: "$callback"
+              type: "callable"
+              optional: false
+          return_type: "self"
+          static: false
+      tags: ["table", "list"]
+
+    - id: "R002"
+      type: "api_signature"
+      line_start: 106
+      line_end: 108
+      content: "| `text($field, $title)` | Text column |"
+      apis:
+        - class: "AntdAdmin\\Component\\Table\\ColumnsContainer"
+          method: "text"
+          params:
+            - name: "$field"
+              type: "string"
+              optional: false
+            - name: "$title"
+              type: "string"
+              optional: false
+          return_type: "Column"
+          static: false
+      tags: ["column", "table"]
+
+    - id: "R003"
+      type: "config_ref"
+      line_start: 156
+      line_end: 158
+      content: "使用 C('ADMIN_PAGE_SIZE') 获取后台分页大小"
+      config_refs:
+        - key: "ADMIN_PAGE_SIZE"
+          context: "后台分页配置"
+          line: 157
+      tags: ["config", "pagination"]
+
+    - id: "R004"
+      type: "best_practice"
+      line_start: 320
+      line_end: 325
+      content: "New projects should use AntdAdmin\\Component\\Table instead of ListBuilder for better React integration."
+      severity: "recommendation"
+      version_constraint: ">=modern"
+      tags: ["migration", "recommendation"]
+
+---
+# Validation schema (for programmatic validation)
+
+validation_rules:
+  - rule: "document path must be relative"
+    check: "not starts_with('/')"
+
+  - rule: "file_hash must be valid SHA256"
+    check: "matches(/^sha256:[a-f0-9]{64}$/)"
+
+  - rule: "rule.id must be unique within document"
+    check: "unique_within(rules, id)"
+
+  - rule: "line_start must be <= line_end"
+    check: "line_start <= line_end"
+
+  - rule: "apis required for code_example and api_signature types"
+    check: "if type in ['code_example', 'api_signature'] then apis not empty"
+
+  - rule: "config_refs required for config_ref type"
+    check: "if type == 'config_ref' then config_refs not empty"

@@ -8,9 +8,11 @@ This glossary defines key terms and concepts used throughout the QSCMF framework
 A hybrid PHP framework combining ThinkPHP 3.2 (legacy layer) and Laravel (modern tooling) for rapid application development.
 
 ### Version Detection
-QSCMF version is detected from `composer.json`:
-- `tiderjian/think-core ^13.0` → v13 (PHP 8.2, PHPUnit 9, jQuery rendering)
-- `tiderjian/think-core ^14.0` → v14 (PHP 8.2+, PHPUnit 10, React rendering)
+QSCMF version is detected from `composer.json` by reading `tiderjian/think-core` version constraint. See the root SKILL.md for current version mapping.
+
+### Rendering Modes
+- **jQuery Mode**: Traditional rendering using jQuery + Bootstrap (legacy)
+- **React Mode**: Modern rendering using React + Ant Design with Inertia.js
 
 ### Base Classes
 - **GyListModel**: Base model class with CRUD methods, validation, and caching
@@ -38,9 +40,9 @@ Universally Unique Lexicographically Sortable Identifier
 ## Frontend Terms
 
 ### AntdAdmin
-Admin UI framework based on Ant Design:
-- **v13**: Uses jQuery for DOM manipulation with Bootstrap
-- **v14**: Uses React with Ant Design components
+Admin UI framework based on Ant Design. Rendering mode depends on configuration:
+- jQuery Mode: Uses jQuery for DOM manipulation with Bootstrap
+- React Mode: Uses React with Ant Design components
 
 ### ListBuilder API
 Dynamic table building system for admin interfaces:
@@ -111,11 +113,10 @@ Development methodology:
 
 ### PHPUnit
 Unit testing framework for PHP:
-- v13 uses PHPUnit 9.x
-- v14 uses PHPUnit 10.x
 - Assertion methods
 - Test fixtures
 - Mock objects
+- Version depends on QSCMF version
 
 ### Feature Tests
 Integration testing:

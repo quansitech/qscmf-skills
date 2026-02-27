@@ -1,24 +1,24 @@
 # QSCMF Core Concepts
 
-This document explains the fundamental concepts shared across QSCMF versions, with clear distinctions between v13 and v14 APIs.
+This document explains the fundamental concepts shared across QSCMF versions, with clear distinctions between rendering modes.
 
 ## API Overview
 
-QSCMF has **two different UI builder APIs** depending on the version:
+QSCMF has **two different UI builder APIs** depending on the rendering mode:
 
-| Version | Primary API | Namespace | Rendering |
-|---------|-------------|-----------|-----------|
-| **v13** | ListBuilder | `\Qscmf\Builder\ListBuilder` | jQuery + Bootstrap |
-| **v14** | AntdAdmin Component | `\AntdAdmin\Component\Table` | React + Ant Design |
-| **v14** | ListBuilder (legacy) | `\Qscmf\Builder\ListBuilder` | jQuery (backward compat) |
+| Mode | Primary API | Namespace | Rendering |
+|------|-------------|-----------|-----------|
+| **jQuery Mode** | ListBuilder | `\Qscmf\Builder\ListBuilder` | jQuery + Bootstrap |
+| **React Mode** | AntdAdmin Component | `\AntdAdmin\Component\Table` | React + Ant Design |
+| **React Mode** | ListBuilder (legacy) | `\Qscmf\Builder\ListBuilder` | jQuery (backward compat) |
 
 ---
 
-## v13 API: ListBuilder
+## jQuery Mode API: ListBuilder
 
-ListBuilder is the primary UI builder for v13. It provides a fluent API for creating admin data tables with jQuery rendering.
+ListBuilder is the primary UI builder for jQuery mode. It provides a fluent API for creating admin data tables with jQuery rendering.
 
-### Basic Usage (v13)
+### Basic Usage (jQuery Mode)
 
 ```php
 use Qscmf\Builder\ListBuilder;
@@ -129,11 +129,11 @@ Use `__field_name__` to reference row data:
 
 ---
 
-## v14 API: AntdAdmin Component
+## React Mode API: AntdAdmin Component
 
-v14 introduces a **new React-based API** using `\AntdAdmin\Component\Table`. This is the primary API for new v14 projects.
+React mode introduces a **new React-based API** using `\AntdAdmin\Component\Table`. This is the primary API for new projects using React rendering.
 
-### Basic Usage (v14)
+### Basic Usage (React Mode)
 
 ```php
 use AntdAdmin\Component\Table;
@@ -215,9 +215,9 @@ $container->action('', '操作')->actions(function ($container) {
 
 ## FormBuilder
 
-Both versions use `FormBuilder` for admin forms, but v14 also has a new React-based form API.
+Both modes use `FormBuilder` for admin forms, but React mode also has a new React-based form API.
 
-### v13/v14 FormBuilder (Legacy API)
+### FormBuilder (Legacy API)
 
 ```php
 use Qscmf\Builder\FormBuilder;
@@ -247,7 +247,7 @@ public function add() {
 }
 ```
 
-### v14 AntdAdmin Form (Modern API)
+### React Mode Form (Modern API)
 
 ```php
 use AntdAdmin\Component\Form;
@@ -418,13 +418,13 @@ $active_products = D('Product')->where([
     'status' => DBCont::NORMAL_STATUS
 ])->select();
 
-// In v13 ListBuilder status column
+// In jQuery Mode ListBuilder status column
 ->addTableColumn('status', 'Status', 'status', [
     1 => ['title' => 'Active', 'class' => 'success'],
     0 => ['title' => 'Inactive', 'class' => 'danger']
 ])
 
-// In v14 AntdAdmin status column
+// In React Mode AntdAdmin status column
 $container->status('status', 'Status')
     ->setValueEnum([
         1 => ['text' => 'Active', 'status' => 'Success'],
@@ -498,12 +498,12 @@ class ProductController extends RestController {
 
 ---
 
-## API Migration Summary
+## API Comparison Summary
 
-When migrating from v13 to v14, use this mapping:
+Comparison between jQuery Mode and React Mode APIs:
 
-| v13 ListBuilder | v14 AntdAdmin Component |
-|-----------------|-------------------------|
+| jQuery Mode ListBuilder | React Mode AntdAdmin Component |
+|-------------------------|-------------------------------|
 | `new \Qscmf\Builder\ListBuilder()` | `new \AntdAdmin\Component\Table()` |
 | `->addTableColumn('name', 'Name')` | `$container->text('name', 'Name')` |
 | `->addTableColumn('status', 'Status', 'status')` | `$container->status('status', 'Status')` |

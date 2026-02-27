@@ -9,7 +9,7 @@ This document extends the common development standards with PHP 8.2+ specific pa
 ### Required PHP Version
 - Minimum PHP 8.2.0
 - Recommended PHP 8.3+ for new projects
-- PHP 8.1+ for legacy support (v13)
+- PHP 8.1+ for legacy support
 
 ### Composer Dependencies
 

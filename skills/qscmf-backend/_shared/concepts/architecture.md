@@ -17,7 +17,7 @@ qscmf-project/
 │   ├── Admin/                    # Backend admin module
 │   │   ├── Controller/           # Admin controllers
 │   │   │   └── ProductController.class.php
-│   │   └── View/                 # Admin views (v13 jQuery)
+│   │   └── View/                 # Admin views (jQuery mode)
 │   ├── Api/                      # RESTful API module
 │   │   └── Controller/           # API controllers
 │   ├── Common/                   # Shared components
@@ -57,7 +57,7 @@ qscmf-project/
 |-----------|---------|---------|
 | **Controllers** | HTTP request handling, page rendering | `ProductController.class.php` |
 | **Models** | Data access, business logic, validation | `ProductModel.class.php` |
-| **Views** | Template rendering (v13: jQuery, v14: Inertia) | `index.html` |
+| **Views** | Template rendering (jQuery mode or Inertia) | `index.html` |
 | **Configuration** | Module-specific settings | `config.php` |
 
 ### Laravel Layer (`lara/`)
@@ -84,8 +84,8 @@ qscmf-project/
 
 | Class | Purpose | Rendering |
 |-------|---------|-----------|
-| `ListBuilder` | Admin data tables with CRUD | jQuery (v13) or React (v14) |
-| `FormBuilder` | Admin forms with validation | jQuery (v13) or React (v14) |
+| `ListBuilder` | Admin data tables with CRUD | jQuery or React mode |
+| `FormBuilder` | Admin forms with validation | jQuery or React mode |
 | `ModalButtonBuilder` | Modal dialogs | jQuery Bootstrap |
 
 ### Database Constants
@@ -108,7 +108,7 @@ DBCont::BOOLEAN_FALSE = 0;
 
 ## Request Flow
 
-### Admin CRUD Request (v14 example)
+### Admin CRUD Request (React mode example)
 
 ```
 1. Browser Request
@@ -193,7 +193,7 @@ return [
     // Admin pagination
     'ADMIN_PER_PAGE_NUM' => 20,
 
-    // v14: Enable AntdAdmin rendering
+    // React mode: Enable AntdAdmin rendering
     'ANTD_ADMIN_BUILDER_ENABLE' => true,
 ];
 ```
@@ -268,10 +268,10 @@ vendor/bin/phpunit
 QUEUE_ENV=prod QUEUE_COUNT=1 php app/queue_resque.php
 ```
 
-## Version Differences
+## Rendering Modes
 
-| Aspect | v13 | v14 |
-|--------|-----|-----|
+| Aspect | jQuery Mode | React Mode |
+|--------|-------------|------------|
 | **Rendering** | jQuery + Bootstrap | React + AntdAdmin |
 | **Frontend** | Traditional templates | Inertia.js SPA |
 | **API** | Mixed HTML/JSON | Clean JSON responses |

@@ -1,0 +1,126 @@
+# QSCMF Deep Scan - Cache File Structure
+# Version: 1.0.0
+# Purpose: Store file hashes and extracted rules for incremental scanning
+
+# Cache metadata
+metadata:
+  version: "1.0.0"
+  created_at: null
+  last_updated: null
+  qscmf_version: null           # Detected QSCMF version (dynamically set)
+  codebase_root: null           # Path to the codebase being scanned
+  last_full_scan: null          # Timestamp of last full scan
+  schema_version: "1.0.0"       # Cache structure version
+
+# File cache entries
+# Key: relative file path from skill root
+# Purpose: Track which files have been scanned and their extraction results
+files:
+  # Example entry structure (populated during scan):
+  # {version}/rules/antdadmin.md:
+  #   hash: "sha256:a1b2c3d4e5f6789..."
+  #   size_bytes: 8192
+  #   last_modified: "2025-02-26T15:30:00Z"
+  #   scan_status: "completed"           # pending | in_progress | completed | failed
+  #   scanned_at: "2025-02-27T10:00:00Z"
+  #   extraction:
+  #     rule_count: 12
+  #     api_count: 45
+  #     config_ref_count: 3
+  #     best_practice_count: 2
+  #   rule_ids: ["R001", "R002", "R003"]
+  #   validation:
+  #     validated_at: "2025-02-27T10:05:00Z"
+  #     verified: 10
+  #     mismatch: 1
+  #     not_found_in_code: 0
+  #     not_found_in_doc: 1
+
+# File hashes index (simple key-value for quick lookup)
+# Format: relative_path: sha256_hash
+file_hashes:
+  # Version-specific files (populated on first scan)
+  # {version}/rules/**/*.md: hash...
+  # {version}/references/**/*.md: hash...
+
+  # Shared files (always included)
+  # _shared/references/*.md: hash...
+  # _shared/concepts/*.md: hash...
+
+# Extracted rules cache (optional - for quick rule lookup by ID)
+# This is a flattened index of all rules across all documents
+rules_index:
+  # Format: "document:rule_id" -> {document, type, line_start, apis}
+  # Example:
+  # "{version}/rules/antdadmin.md:R001":
+  #   document: "{version}/rules/antdadmin.md"
+  #   type: "code_example"
+  #   line_start: 27
+  #   apis:
+  #     - "AntdAdmin\\Component\\Table::setMetaTitle"
+  #     - "AntdAdmin\\Component\\Table::columns"
+
+# API index (for quick API lookup)
+# Format: class::method -> list of rules that reference it
+api_index:
+  # Example:
+  # "AntdAdmin\\Component\\Table::setMetaTitle":
+  #   - "{version}/rules/antdadmin.md:R001"
+  #   - "{version}/references/table-api.md:R003"
+
+# Validation results cache (Phase 3 results)
+# Caches validation status for each API to avoid re-validation
+validation_cache:
+  # Format: class::method -> {status, usage_count, last_verified, evidence_files}
+  # Example:
+  # "AntdAdmin\\Component\\Table::setMetaTitle":
+  #   status: "VERIFIED"                # VERIFIED | MISMATCH | NOT_FOUND_IN_CODE | NOT_FOUND_IN_DOC | AMBIGUOUS
+  #   usage_count: 12
+  #   last_verified: "2025-02-27T10:05:00Z"
+  #   evidence_files:
+  #     - "app/Admin/Controller/ProductController.class.php:45"
+  #     - "app/Admin/Controller/OrderController.class.php:32"
+
+# Scan history (for debugging and rollback)
+scan_history:
+  # - timestamp: "2025-02-27T10:00:00Z"
+  #   trigger: "manual"                # manual | auto | scheduled
+  #   version: "{detected_version}"
+  #   files_scanned: 48
+  #   rules_extracted: 156
+  #   duration_seconds: 180
+  #   status: "completed"              # completed | partial | failed
+  #   error: null                      # Error message if failed
+
+# Incremental scan statistics
+stats:
+  total_scans: 0
+  full_scans: 0
+  incremental_scans: 0
+  cache_hits: 0
+  cache_misses: 0
+  total_files_processed: 0
+  total_rules_extracted: 0
+
+# Cache operations reference:
+#
+# Incremental scan check:
+# 1. Read current file hash
+# 2. Compare with cached hash in file_hashes
+# 3. If different: mark for re-scan, update files entry
+# 4. If same: skip extraction, use cached rules from rules_index
+#
+# Force full scan (--force):
+# 1. Clear files section
+# 2. Clear file_hashes
+# 3. Clear rules_index
+# 4. Clear api_index
+# 5. Clear validation_cache
+# 6. Re-scan all documents
+#
+# Cache invalidation rules:
+# - File content changed: re-extract rules, update hash
+# - File deleted: remove from all indexes
+# - File renamed: treat as delete + add
+# - Schema version changed: force full re-scan
+# - Codebase root changed: keep hashes, invalidate validation_cache

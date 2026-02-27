@@ -5,10 +5,10 @@ Triggered by `/qscmf-learn` after a QSCMF development session.
 ## Step 1: Detect QSCMF Version
 
 1. Read `composer.json` for `tiderjian/think-core` version
-2. Fallback: scan conversation for markers (Inertia.js/AntdAdmin → v14, ListBuilder/jQuery → v13)
+2. Fallback: scan conversation for rendering mode markers (Inertia.js/AntdAdmin → React mode, ListBuilder/jQuery → jQuery mode)
 3. If uncertain, ask user
 
-**Output:** `$qscmfVersion` ("v13" or "v14"), `$basePath` = `skills/qscmf-backend/{version}/`
+**Output:** `$qscmfVersion`, `$basePath` = `skills/qscmf-backend/{version}/`
 
 ---
 
@@ -180,14 +180,14 @@ learnings:
     extracted_at: "2025-02-26T10:00:00Z"
     confidence: "high"
     type: "pattern"
-    target: "v14/rules/pattern/pattern-redis-lock.md"
+    target: "{version}/rules/pattern/pattern-redis-lock.md"
     status: "applied"
 
 corrections:
   - id: "C001"
     type: "api-mismatch"
     confidence: "high"
-    target_file: "v14/rules/api-controllers.md"
+    target_file: "{version}/rules/api-controllers.md"
     target_line: 45
     evidence:
       dialogue_code: "$table->setDataSource()"

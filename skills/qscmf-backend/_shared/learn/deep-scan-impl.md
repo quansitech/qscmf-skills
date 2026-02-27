@@ -11,7 +11,7 @@ Detailed implementation for `/qscmf-learn --deep-scan` Phase 1-5.
 ```
 P1.1 版本检测
 ├── 读取 composer.json 检测 "tiderjian/think-core" 版本
-└── "^13.0" → v13, "^14.0" → v14
+└── 根据版本号确定对应的版本目录
 
 P1.2 路径构建
 ├── SKILL_ROOT = ~/.claude/skills/qscmf-backend/
@@ -43,14 +43,14 @@ P1.5 缓存更新
 ```yaml
 # phase1_manifest.yaml
 scan_metadata:
-  version: "v14"
+  version: "{detected_version}"
   scanned_at: "2025-02-27T10:00:00Z"
   total_files: 48
   cached_files: 35
   new_or_changed: 13
 
 files:
-  - path: "v14/rules/antdadmin.md"
+  - path: "{version}/rules/antdadmin.md"
     hash: "sha256:a1b2c3d4..."
     status: "NEEDS_SCAN"
     size_bytes: 8192
@@ -79,7 +79,7 @@ P2.3 配置项识别
 
 P2.4 最佳实践识别
 ├── 关键词: "应该", "必须", "注意", "重要", "SHOULD", "MUST"
-├── 版本标记: "v14-only", "v13-only", "deprecated"
+├── 版本标记: "modern-only", "legacy-only", "deprecated"
 └── 输出: best_practices[]
 ```
 
@@ -95,7 +95,7 @@ P2.4 最佳实践识别
 ### Output Format
 
 ```yaml
-document: "v14/rules/antdadmin.md"
+document: "{version}/rules/antdadmin.md"
 file_hash: "sha256:a1b2c3d4..."
 extracted_at: "2025-02-27T10:00:00Z"
 
@@ -127,9 +127,9 @@ rules:
   - id: "R003"
     type: "best_practice"
     line_start: 320
-    content: "New v14 projects should use AntdAdmin\\Component\\Table"
+    content: "New projects should use AntdAdmin\\Component\\Table"
     severity: "recommendation"
-    version_constraint: ">=v14"
+    version_constraint: ">=modern"
 ```
 
 > 完整 Schema 见 [schema/extracted_rules.yaml](./schema/extracted_rules.yaml)
@@ -193,7 +193,7 @@ validation_metadata:
 
 validations:
   - rule_id: "R001"
-    document: "v14/rules/antdadmin.md"
+    document: "{version}/rules/antdadmin.md"
     type: "api_signature"
     api: "AntdAdmin\\Component\\Table::setMetaTitle"
     status: "VERIFIED"
@@ -204,7 +204,7 @@ validations:
     usage_count: 12
 
   - rule_id: "R015"
-    document: "v14/rules/test/test-wall-mock.md"
+    document: "{version}/rules/test/test-wall-mock.md"
     type: "code_example"
     api: "Common\\Lib\\Wall\\PaymentWall"
     status: "MISMATCH"
@@ -299,11 +299,11 @@ def calculate_confidence(result):
 #### 1. ContentHelperTrait::formItemFilter()
 - **Found in**: `app/Admin/Controller/PostController.class.php:163`
 - **Evidence**: `$table->setFormItemFilter($this->formItemFilter())`
-- **Proposal**: Add to `v14/rules/crud/crud-form-validation.md`
+- **Proposal**: Add to `{version}/rules/crud/crud-form-validation.md`
 
 ### [FIX] Corrections (12)
 #### 1. NoLogClient namespace mismatch
-- **Document**: `v14/rules/test/test-wall-mock.md:32`
+- **Document**: `{version}/rules/test/test-wall-mock.md:32`
 - **Claims**: `Common\Lib\Wall\PaymentWall`
 - **Actual**: `Common\Lib\BusinessWall\NoLogClient`
 - **Proposal**: Update examples to use actual project classes

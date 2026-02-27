@@ -53,5 +53,5 @@ After a QSCMF development session, use `/qscmf-learn` to capture learnings:
 ## Getting Started
 
 1. Check the root [SKILL.md](../SKILL.md) for version detection
-2. Navigate to your version-specific SKILL.md (v13/ or v14/)
+2. Navigate to your version-specific SKILL.md
 3. Use shared references for cross-version concepts
