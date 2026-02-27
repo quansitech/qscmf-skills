@@ -83,28 +83,10 @@ The following concepts apply to all versions:
 
 - **[Framework Architecture](_shared/concepts/architecture.md)** - ThinkPHP + Laravel hybrid structure
 - **[Core Concepts](_shared/concepts/core-concepts.md)** - ListBuilder API, AntdAdmin Component API, GyListModel, DBCont
-- **[Version History](_shared/concepts/version-history.md)** - Evolution from v13 to v14
-
-## Migration Guides
-
-- **[Migration: v13 to v14](_shared/references/migration-v13-to-v14.md)** - Upgrade guide between versions
 
 ## Terminology
 
 - **[Glossary](_shared/references/glossary.md)** - Common terms and definitions
-
-## Version Feature Matrix
-
-| Feature | v13 | v14 |
-|---------|-----|-----|
-| **PHP Version** | 8.2 | 8.2+ |
-| **PHPUnit** | ^9.3.0 | ^10.0 |
-| **Primary UI API** | `ListBuilder` | `AntdAdmin\Component\Table` |
-| **Backward Compat API** | N/A | `ListBuilder` (jQuery mode) |
-| **Rendering** | jQuery + Bootstrap | React + Ant Design |
-| **Frontend Framework** | Traditional templates | Inertia.js SPA |
-| **HasLayoutProps Trait** | No | Yes |
-| **X-Inertia Headers** | No | Yes |
 
 ## API Architecture (CRITICAL)
 
@@ -167,16 +149,6 @@ $builder = new \Qscmf\Builder\ListBuilder();
 $builder->build();
 ```
 
-## Choosing the Right API
-
-| Scenario | Recommended API |
-|----------|-----------------|
-| New v14 project | `AntdAdmin\Component\Table` (React) |
-| Migrating from v13 | `ListBuilder` first, then migrate to Component API |
-| v13 project | `ListBuilder` only |
-| Need React SPA features | v14 with Component API |
-| Legacy jQuery requirements | v13 or v14 with ListBuilder |
-
 ## Iron Laws
 
 ### Scaffold
@@ -220,7 +192,6 @@ Invoke `/qscmf-learn` to analyze the conversation and propose improvements.
 | **API Usage** | `rules/{api}.md` or `references/{topic}.md` | TableContainer setDataSource() method |
 | **Field Type** | `rules/field-type-inference.md` | *_price fields → number input |
 | **Template** | `templates/{component}.php.tpl` | Export form boilerplate |
-| **Version Diff** | `_shared/references/migration-v*.md` | v14 Form validation differences |
 
 ### Workflow Details
 

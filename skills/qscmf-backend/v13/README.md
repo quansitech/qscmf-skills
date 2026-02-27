@@ -1,116 +1,78 @@
-# QSMCF Backend3 - Version 13
+# QSCMF Backend - Version 13
 
-This directory contains version-specific implementation details for QSMCF Backend3 v13, which is built on Laravel 9/10 with PHP 8.1+ support.
+This directory contains version-specific implementation details for QSCMF v13.
+
+> **Note**: For version detection, see the root [SKILL.md](../SKILL.md).
 
 ## Version Overview
 
-QSMCF v13 maintains compatibility with:
-- Laravel 9.0 - 10.0
-- PHP 8.1+ (with 8.2+ recommended)
-- Legacy jQuery for frontend
-- AntdAdmin v5 components
-- Blade templates with legacy syntax
+QSCMF v13 features:
+- **PHP 8.2** with type declarations
+- **PHPUnit 9** for testing
+- **jQuery + Bootstrap** for frontend rendering
+- **ListBuilder API** with traditional template rendering
 
-## Key Differences from v14
+## Rendering Mode
 
-### Frontend Stack
-- **jQuery-based**: Traditional jQuery for DOM manipulation
-- **AntdAdmin v5**: Uses AntdAdmin version 5 components
-- **Legacy blade syntax**: No modern blade features like `@json` or `@vite`
+v13 uses **jQuery + Bootstrap 3** rendering:
 
-### ListBuilder Implementation
 ```php
-// v13 ListBuilder without type hints
-class ProductListBuilder extends BaseListBuilder
-{
-    public function getListFields()
-    {
-        return [
-            'id' => ['title' => 'ID', 'width' => 80],
-            'name' => ['title' => 'Name', 'minWidth' => 120],
-            // ... fields
-        ];
-    }
-}
+// Environment constant
+ANTD_ADMIN_BUILDER_ENABLE = false  // v13 default
 ```
 
-### Controller Patterns
+## Key Features
+
+### ListBuilder API
+
+v13 uses the ListBuilder API with jQuery/Bootstrap rendering:
+
 ```php
-// v13 Admin Controller with minimal type hints
-class ProductController extends BaseAdminController
-{
-    protected $model = 'Product';
-    
-    protected function getListFields()
-    {
-        return [
-            'id' => ['title' => 'ID', 'width' => 80],
-            // ... fields
-        ];
-    }
-}
+$builder = $this->builder();
+
+// Table columns
+$builder->addTableColumn('id', 'ID');
+$builder->addTableColumn('name', '名称');
+$builder->addTableColumn('status', '状态', DBCont::getStatusList());
+
+// Search items
+$builder->addSearchItem('keyword', 'text', '关键词');
+$builder->addSearchItem('status', 'select', '状态', '', DBCont::getStatusList());
+
+// Buttons
+$builder->addTopButton('addnew', ['title' => '新增']);
+$builder->addRightButton('edit', ['href' => U('edit', ['id' => '@id@'])]);
+$builder->addRightButton('delete', ['href' => U('delete', ['ids' => '@id@'])]);
+
+$builder->display();
 ```
 
-## Version-Specific Features
+### Bootstrap CSS Classes
 
-### Compatibility Mode
+v13 admin pages use Bootstrap 3 classes:
 
-To maintain backward compatibility:
+```html
+<!-- Status badges -->
+<span class="label label-success">启用</span>
+<span class="label label-default">禁用</span>
 
-```php
-// Check Laravel version
-if (app()->version() < '11.0') {
-    // v13 specific code
-    $this->usingLegacyjQuery = true;
-} else {
-    // v14 specific code
-    $this->usingVue3 = true;
-}
+<!-- Buttons -->
+<button class="btn btn-primary">新增</button>
+<button class="btn btn-danger">删除</button>
 ```
 
-### Database Schema
+### jQuery Event Handling
 
-v13 uses:
-- `unsignedInteger()` for primary keys
-- `boolean()` for tinyint(1) fields
-- Legacy index syntax
-
-```php
-Schema::create('products', function (Blueprint $table) {
-    $table->increments('id');
-    $table->string('name', 255);
-    $table->decimal('price', 10, 2)->default(0);
-    $table->boolean('status')->default(true);
-    $table->timestamps();
+```javascript
+// Custom form submission
+$('#myForm').on('submit', function(e) {
+    e.preventDefault();
+    $.post($(this).attr('action'), $(this).serialize(), function(res) {
+        if (res.status) {
+            location.reload();
+        }
+    });
 });
-```
-
-## Migration Considerations
-
-When upgrading from v12 to v13:
-1. Update Laravel to 9.x or 10.x
-2. Keep jQuery for existing components
-3. Update AntdAdmin to v5
-4. Maintain legacy blade syntax
-
-## Testing
-
-v13 uses:
-- PHPUnit 9.x
-- Laravel TestSuite
-- Legacy factory methods
-
-```php
-class ProductTest extends TestCase
-{
-    use RefreshDatabase;
-    
-    public function test_product_creation()
-    {
-        $product = Product::factory()->create();
-        $this->assertNotNull($product);
-    }
-}
 ```
 
 ## Configuration
@@ -119,28 +81,50 @@ class ProductTest extends TestCase
 ```json
 {
     "require": {
-        "php": "^8.1",
-        "laravel/framework": "^9.0|^10.0",
-        "tiderjian/qsmcf-core": "^3.0"
+        "php": "^8.2",
+        "tiderjian/think-core": "^13.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.3.0"
     }
 }
 ```
 
-### PHP Version Support
-- PHP 8.1: Full support
-- PHP 8.2: Recommended for new features
-- PHP 8.3: Supported with some deprecations
+## Testing
 
-## Upgrade Path
+v13 uses PHPUnit 9:
 
-From v12 to v13:
-1. Update dependencies
-2. Review blade templates for syntax changes
-3. Update jQuery-based components
-4. Test all admin functionality
+```php
+class ProductTest extends TestCase
+{
+    public function testIndex()
+    {
+        $response = $this->get('/admin/product/index');
+        $response->assertStatus(200);
+        $response->assertSee('Product List');
+    }
+}
+```
 
-From v13 to v14:
-1. Upgrade Laravel to 11.x
-2. Migrate to Vue 3 components
-3. Update AntdAdmin to v6+
-4. Modernize blade templates
+## Directory Structure
+
+```
+v13/
+├── SKILL.md               # v13 workflow (main entry)
+├── README.md              # This file
+├── templates/             # Code generation templates
+│   ├── admin_controller.php.tpl
+│   ├── model.php.tpl
+│   ├── api_controller.php.tpl
+│   └── test_case.php.tpl
+└── rules/                 # Version-specific rules
+    ├── listbuilder-api.md
+    ├── formbuilder-api.md
+    ├── legacy-jquery.md
+    └── ...
+```
+
+## Getting Started
+
+1. Read the [SKILL.md](./SKILL.md) for complete v13 workflow
+2. Use shared references from [_shared/](../_shared/) for cross-version concepts

@@ -94,22 +94,24 @@ The skill activates when your project has QSCMF structure:
 ## File Structure Reference
 
 ```
-qsmcf-backend3/
+qscmf-backend/
 ├── SKILL.md                   # Main skill workflow (START HERE)
 ├── README.md                  # This file
 ├── _shared/                   # Shared content across all versions
 │   ├── README.md              # Unified skill introduction
 │   ├── concepts/              # Core concepts documentation
 │   │   ├── architecture.md    # Framework architecture
-│   │   ├── core-concepts.md   # ListBuilder, AntdAdmin, GyListModel
-│   │   └── version-history.md # Evolution from v13 to v14
-│   └── references/            # Comprehensive guides
-│       ├── api-controllers.md
-│       ├── model-guide.md
-│       ├── development-standards.md
-│       ├── migration-metadata.md
-│       ├── abstract-base-patterns.md
-│       └── glossary.md
+│   │   └── core-concepts.md   # ListBuilder, AntdAdmin, GyListModel
+│   ├── references/            # Comprehensive guides
+│   │   ├── api-controllers.md
+│   │   ├── model-guide.md
+│   │   ├── development-standards.md
+│   │   ├── migration-metadata.md
+│   │   ├── abstract-base-patterns.md
+│   │   └── glossary.md
+│   └── learn/                 # Learning system
+│       ├── workflow.md        # Learning workflow
+│       └── deep-scan-impl.md  # Deep scan implementation
 ├── v13/                       # Version 13 specific
 │   ├── SKILL.md               # v14 workflow
 │   ├── README.md              # v13 details
@@ -462,7 +464,6 @@ NO ADMIN CRUD WITHOUT MIGRATION METADATA FIRST
 
 - **[v13/SKILL.md](v13/SKILL.md)** - Complete v13 workflow
 - **[v14/SKILL.md](v14/SKILL.md)** - Complete v14 workflow
-- **[Migration: v13 to v14](_shared/references/migration-v13-to-v14.md)** - Upgrade guide
 - **[Glossary](_shared/references/glossary.md)** - Common terms and definitions
 
 ## License

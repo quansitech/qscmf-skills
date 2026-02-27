@@ -393,23 +393,6 @@ See: [rules/legacy-jquery.md](rules/legacy-jquery.md)
 
 ---
 
-## Migration Path to v14
-
-The **ListBuilder API is identical** in v13 and v14. Only the rendering differs:
-
-| Feature | v13 | v14 |
-|---------|-----|-----|
-| API | `addTableColumn()`, `addTopButton()` | Same |
-| Rendering | jQuery/Bootstrap | React/AntdAdmin |
-| Switch | `ANTD_ADMIN_BUILDER_ENABLE=false` | `ANTD_ADMIN_BUILDER_ENABLE=true` |
-
-To upgrade:
-1. Update `tiderjian/think-core` to `^14.0`
-2. Set `ANTD_ADMIN_BUILDER_ENABLE=true`
-3. Controllers remain unchanged
-
----
-
 ## Rules Reference
 
 ### Core API Rules

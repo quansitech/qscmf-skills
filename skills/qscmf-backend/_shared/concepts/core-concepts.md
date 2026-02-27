@@ -514,5 +514,3 @@ When migrating from v13 to v14, use this mapping:
 | `->setTableDataList($data)` | `->setDataSource($data)` |
 | `->setTableDataPage($page->show())` | `->setPagination(new Pagination(...))` |
 | `->build()` | `->render()` |
-
-For detailed migration guide, see [Migration: v13 to v14](../references/migration-v13-to-v14.md).

@@ -1,15 +1,16 @@
-# Glossary of QSMCF Terms
+# Glossary of QSCMF Terms
 
-This glossary defines key terms and concepts used throughout the QSMCF framework and documentation.
+This glossary defines key terms and concepts used throughout the QSCMF framework and documentation.
 
 ## Core Concepts
 
-### QSMCF (QuickStart Management Framework)
-A modern PHP framework built on Laravel 11+ with TypeScript support and advanced features for rapid application development.
+### QSCMF (QuickStart Content Management Framework)
+A hybrid PHP framework combining ThinkPHP 3.2 (legacy layer) and Laravel (modern tooling) for rapid application development.
 
-### v13 vs v14
-- **v13**: Built on Laravel 9/10 with PHP 8.1+, uses jQuery and AntdAdmin v5
-- **v14**: Built on Laravel 11 with PHP 8.3+, uses Vue 3 and AntdAdmin v6+
+### Version Detection
+QSCMF version is detected from `composer.json`:
+- `tiderjian/think-core ^13.0` → v13 (PHP 8.2, PHPUnit 9, jQuery rendering)
+- `tiderjian/think-core ^14.0` → v14 (PHP 8.2+, PHPUnit 10, React rendering)
 
 ### Base Classes
 - **GyListModel**: Base model class with CRUD methods, validation, and caching
@@ -32,14 +33,14 @@ System for storing and using table schema information for code generation:
 - Form and list configurations
 
 ### ULID
-Universally Unique Lexicographically Sortable Identifier (Laravel 11+ feature)
+Universally Unique Lexicographically Sortable Identifier
 
 ## Frontend Terms
 
 ### AntdAdmin
 Admin UI framework based on Ant Design:
-- **v5**: Uses jQuery for DOM manipulation
-- **v6+**: Uses Vue 3 with Composition API
+- **v13**: Uses jQuery for DOM manipulation with Bootstrap
+- **v14**: Uses React with Ant Design components
 
 ### ListBuilder API
 Dynamic table building system for admin interfaces:
@@ -54,13 +55,6 @@ Form generation system:
 - Validation rules
 - File uploads
 - Image handling
-
-### Vue 3 Composition API
-Modern Vue.js feature for building components:
-- `ref()`: Reactive state
-- `computed()`: Computed properties
-- `onMounted()`: Lifecycle hooks
-- `defineProps()`: Component props
 
 ### Inertia.js
 Modern framework for building SPAs without full JavaScript:
@@ -117,16 +111,11 @@ Development methodology:
 
 ### PHPUnit
 Unit testing framework for PHP:
+- v13 uses PHPUnit 9.x
+- v14 uses PHPUnit 10.x
 - Assertion methods
 - Test fixtures
 - Mock objects
-- Data providers
-
-### PestPHP
-Alternative testing framework:
-- Fluent syntax
-- Focus on developers
-- Built on PHPUnit
 
 ### Feature Tests
 Integration testing:

@@ -276,5 +276,3 @@ QUEUE_ENV=prod QUEUE_COUNT=1 php app/queue_resque.php
 | **Frontend** | Traditional templates | Inertia.js SPA |
 | **API** | Mixed HTML/JSON | Clean JSON responses |
 | **Testing** | PHPUnit 9 | PHPUnit 10 |
-
-For detailed version differences, see [Version History](version-history.md).
