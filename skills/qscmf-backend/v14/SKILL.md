@@ -639,10 +639,9 @@ QueueJob::dispatch(ExportJob::class, [
 - [Add CRUD](rules/workflow/workflow-add-crud.md) - CRUD implementation workflow
 
 ### CRUD
-- [Table Columns](rules/crud/crud-table-columns-v14.md) - Table column configuration
+- [Table Columns](rules/crud/crud-table-columns.md) - Column configuration and custom renderers
 - [Search](rules/crud/crud-search-basic.md) - Search form configuration
 - [Form Validation](rules/crud/crud-form-validation.md) - Form validation rules
-- [Custom Components](rules/crud/crud-custom-components.md) - Custom renderers
 - [Batch Actions](rules/crud/crud-batch-actions.md) - Batch operations
 
 ### API

@@ -424,6 +424,75 @@ protected function checkCategory($value)
 
 ---
 
+## Conditional Validation Patterns
+
+### Pattern: Dynamic Validation Based on Context
+
+When validation requirements depend on another field's value (e.g., category type determines required fields):
+
+```php
+use AntdAdmin\Component\ColumnType\RuleType\Validator;
+
+$columns->text('data', '数据')
+    ->addRule(new Validator(function($value, $form) {
+        $type = $form['type'] ?? 'default';
+
+        // Define rules per context
+        $rules = [
+            'type_a' => ['field1'],
+            'type_b' => ['field2', 'field3'],
+            'type_c' => [['f4', 'f5'], 'f6'],
+            'default' => ['title']
+        ];
+
+        return $this->validateFields($form, $rules[$type] ?? $rules['default']);
+    }));
+
+// Helper method in controller or trait
+protected function validateFields(array $form, array $rules): bool|string
+{
+    foreach ($rules as $rule) {
+        if (is_array($rule)) {
+            // OR logic: at least one required
+            $hasAny = false;
+            foreach ($rule as $field) {
+                if (!empty($form[$field])) {
+                    $hasAny = true;
+                    break;
+                }
+            }
+            if (!$hasAny) {
+                return '以下字段至少填写一个: ' . implode(', ', $rule);
+            }
+        } else {
+            // AND logic: required
+            if (empty($form[$rule])) {
+                return "字段 {$rule} 为必填项";
+            }
+        }
+    }
+    return true;
+}
+```
+
+### Logic Reference
+
+| Pattern | Meaning |
+|---------|---------|
+| `['f1', 'f2']` | f1 AND f2 required |
+| `[['f1', 'f2']]` | f1 OR f2 (at least one) |
+| `[['f1', 'f2'], 'f3']` | (f1 OR f2) AND f3 |
+
+### Use Cases
+
+| Scenario | Rule Example |
+|----------|-------------|
+| Content type decides fields | `'article' => ['title', 'content']` |
+| Source type decides URL/file | `'link' => ['url'], 'file' => ['file_id']` |
+| Either URL or file required | `[['url', 'file_id']]` |
+
+---
+
 ## Controller Validation
 
 ```php
@@ -523,6 +592,6 @@ class ProductModel extends GyListModel
 
 ## Related Rules
 
-- [FormBuilder API](../formbuilder-api.md) - Form field configuration
 - [AntdAdmin Components](../antdadmin.md) - Component reference
-- [Model Guide](../../references/model-guide.md) - Model patterns
+- [Table Columns](crud-table-columns.md) - Column configuration and custom renderers
+- [FormBuilder API](../formbuilder-api.md) - Legacy form API

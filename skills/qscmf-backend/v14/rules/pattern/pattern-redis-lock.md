@@ -76,7 +76,7 @@ public function processWithTimeout()
 ## Lock in Model
 
 ```php
-// app/Common/Model/OrderModel.class.php
+// Model 类文件 (如 OrderModel.class.php)
 
 class OrderModel extends GyListModel
 {

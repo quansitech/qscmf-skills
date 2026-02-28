@@ -215,6 +215,118 @@ $container->text('status_icon', '状态')
     });
 ```
 
+### 9. Common Render Patterns
+
+```php
+// Status with color badge
+$container->text('status_display', '状态')
+    ->setRender(function($value, $row) {
+        $color_map = [0 => 'default', 1 => 'success', 2 => 'warning', 3 => 'error'];
+        $text_map = [0 => '待处理', 1 => '已完成', 2 => '处理中', 3 => '已取消'];
+        $status = $row['status'];
+        return sprintf(
+            '<span class="ant-tag ant-tag-%s">%s</span>',
+            $color_map[$status] ?? 'default',
+            $text_map[$status] ?? '未知'
+        );
+    });
+
+// Image with preview
+$container->text('cover_display', '封面')
+    ->setRender(function($value, $row) {
+        if (empty($row['cover'])) {
+            return '<span class="ant-tag">无图片</span>';
+        }
+        $url = get_image_url($row['cover']);
+        return sprintf(
+            '<a href="%s" target="_blank"><img src="%s" style="max-width:60px;max-height:40px;"></a>',
+            $url, $url
+        );
+    });
+
+// Avatar with name
+$container->text('user', '用户')
+    ->setRender(function($value, $row) {
+        $user = D('User')->find($row['user_id']);
+        if (!$user) return '未知';
+        $avatar = !empty($user['avatar']) ? get_image_url($user['avatar']) : 'https://ui-avatars.com/api/?name=' . urlencode($user['name']);
+        return sprintf(
+            '<div style="display: flex; align-items: center;"><img src="%s" style="width: 32px; height: 32px; border-radius: 50%; margin-right: 8px;"><span>%s</span></div>',
+            $avatar, $user['name']
+        );
+    });
+
+// Multi-column info
+$container->text('product_info', '商品信息')
+    ->setRender(function($value, $row) {
+        return sprintf(
+            '<div><div class="product-name"><strong>%s</strong></div><div class="text-muted">编码: %s</div><div class="text-danger">¥%s</div></div>',
+            $row['name'], $row['code'], number_format($row['price'], 2)
+        );
+    });
+
+// Link with action
+$container->text('action_link', '操作')
+    ->setRender(function($value, $row) {
+        return sprintf('<a href="%s" class="ant-btn ant-btn-link">查看</a>', U('detail', ['id' => $row['id']]));
+    });
+```
+
+---
+
+## Custom Column Types
+
+### Extending BaseColumn
+
+```php
+<?php
+namespace Admin\Component;
+
+use AntdAdmin\Component\Table\ColumnType\BaseColumn;
+use Gy_Library\DBCont;
+
+class StatusColumn extends BaseColumn
+{
+    protected $type = 'select';
+
+    public function setStatusMap(array $map)
+    {
+        $this->setValueEnum($map);
+        return $this;
+    }
+
+    public function setDefaultBadge()
+    {
+        $this->setBadge([
+            DBCont::NORMAL_STATUS => 'success',
+            DBCont::FORBIDDEN_STATUS => 'default'
+        ]);
+        return $this;
+    }
+
+    public function enableSearch()
+    {
+        $this->setSearch(true);
+        return $this;
+    }
+}
+```
+
+### Using Custom Column
+
+```php
+use Admin\Component\StatusColumn;
+
+$table->columns(function (Table\ColumnsContainer $container) {
+    $status = new StatusColumn('status', '状态');
+    $status->setStatusMap(DBCont::getStatusList())
+        ->setDefaultBadge()
+        ->enableSearch();
+
+    $container->addColumn($status);
+});
+```
+
 ---
 
 ## Column Methods
@@ -441,5 +553,5 @@ class ProductController extends QsListController
 
 - [AntdAdmin Components](../antdadmin.md) - Complete component reference
 - [CRUD Search Basic](crud-search-basic.md) - Search configuration
-- [CRUD Custom Components](crud-custom-components.md) - Custom renderers
+- [Form Validation](crud-form-validation.md) - Form validation rules
 - [ListBuilder API](../listbuilder-api.md) - Legacy API reference

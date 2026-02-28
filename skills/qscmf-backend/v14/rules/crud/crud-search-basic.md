@@ -415,6 +415,6 @@ class ProductController extends QsListController
 
 ## Related Rules
 
-- [Table Columns v14](crud-table-columns-v14.md) - Column configuration
+- [Table Columns](crud-table-columns.md) - Column configuration
 - [AntdAdmin Components](../antdadmin.md) - Complete component reference
 - [ListBuilder API](../listbuilder-api.md) - Legacy API reference

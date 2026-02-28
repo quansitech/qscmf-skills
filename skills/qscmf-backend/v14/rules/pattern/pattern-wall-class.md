@@ -20,7 +20,7 @@ Wrap external service calls for testability and maintainability in QSCMF v14.
 ## Basic Wall Class
 
 ```php
-// app/Common/Lib/Wall/PaymentWall.php
+// Wall 类文件 (如 PaymentWall.php)
 
 namespace Common\Lib\Wall;
 
@@ -117,7 +117,7 @@ class PaymentWall
 ## Using Wall in Model
 
 ```php
-// app/Common/Model/OrderModel.class.php
+// Model 类文件 (如 OrderModel.class.php)
 
 class OrderModel extends GyListModel
 {
@@ -169,7 +169,7 @@ class OrderModel extends GyListModel
 ## SMS Wall Example
 
 ```php
-// app/Common/Lib/Wall/SmsWall.php
+// Wall 类文件 (如 SmsWall.php)
 
 namespace Common\Lib\Wall;
 

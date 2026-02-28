@@ -20,7 +20,7 @@ Create reusable base classes for similar modules in QSCMF v14.
 ## Abstract Base Controller
 
 ```php
-// app/Admin/Controller/BaseCateController.class.php
+// Admin 控制器基类文件 (如 BaseCateController.class.php)
 
 namespace Admin\Controller;
 
@@ -100,7 +100,7 @@ abstract class BaseCateController extends QsListController
 ## Concrete Implementation
 
 ```php
-// app/Admin/Controller/ArticleCateController.class.php
+// Admin 控制器文件 (如 ArticleCateController.class.php)
 
 namespace Admin\Controller;
 
@@ -140,7 +140,7 @@ class ArticleCateController extends BaseCateController
 ```
 
 ```php
-// app/Admin/Controller/ProductCateController.class.php
+// Admin 控制器文件 (如 ProductCateController.class.php)
 
 namespace Admin\Controller;
 
@@ -175,7 +175,7 @@ class ProductCateController extends BaseCateController
 ## Abstract Base Model
 
 ```php
-// app/Common/Model/BaseCateModel.class.php
+// Model 基类文件 (如 BaseCateModel.class.php)
 
 namespace Common\Model;
 

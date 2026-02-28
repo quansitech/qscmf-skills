@@ -437,6 +437,49 @@ public function batchExportExcel()
 
 ---
 
+## Batch Operations with Async Jobs
+
+### Pattern: Selection-Based Async Processing
+
+Use `relateSelection()` to pass selected IDs to async job handlers:
+
+```php
+$table->actions(function (Table\ActionsContainer $container) {
+    // Dispatch async job for selected items
+    $container->button('批量处理')
+        ->relateSelection()
+        ->request('post', U('batchProcess'), [
+            'selection' => '__id__',
+            'context' => $this->getContext(),
+        ], null, '确定要批量处理吗？');
+});
+```
+
+### Handler Pattern
+
+```php
+public function batchProcess()
+{
+    $ids = I('post.selection');
+    $context = I('post.context');
+
+    if (empty($ids)) {
+        $this->error('请选择要处理的记录');
+    }
+
+    $id_array = is_array($ids) ? $ids : explode(',', $ids);
+
+    // Dispatch to queue
+    foreach ($id_array as $id) {
+        YourJob::dispatch($id, $context);
+    }
+
+    $this->success('已提交处理队列');
+}
+```
+
+---
+
 ## Batch with Transaction
 
 ### Safe Batch Processing
@@ -651,6 +694,6 @@ class ProductController extends QsListController
 
 ## Related Rules
 
-- [Table Columns v14](crud-table-columns-v14.md) - Column configuration
+- [Table Columns](crud-table-columns.md) - Column configuration and custom renderers
 - [AntdAdmin Components](../antdadmin.md) - Component reference
-- [CRUD Custom Components](crud-custom-components.md) - Custom actions
+- [Form Validation](crud-form-validation.md) - Form validation rules

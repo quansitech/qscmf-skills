@@ -57,5 +57,5 @@ DBCont::getStatusList()  // [1 => '启用', 0 => '禁用']
 ---
 
 ## Related Documentation
-- [Table Columns](../rules/crud/crud-table-columns-v14.md)
+- [Table Columns](../rules/crud/crud-table-columns.md)
 - [AntdAdmin Components](../rules/antdadmin.md)

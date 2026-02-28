@@ -93,6 +93,33 @@ Phase 5: 安全防护 → 敏感数据脱敏、敏感文件排除
 | Field Type | Field name → type mapping | `$basePath/rules/field-type-inference.md` |
 | Template | Missing boilerplate | `$basePath/templates/{component}.php.tpl` |
 
+### ⚠️ CRITICAL: Abstract, Not Business-Specific
+
+**Iron Law**: Pattern files must describe **essence**, not **business implementation**.
+
+| ❌ BAD (Business-Specific) | ✅ GOOD (Abstract Pattern) |
+|---------------------------|--------------------------|
+| `pattern-ai-tag.md` | `pattern-async-task-state-machine.md` |
+| `pattern-knowledge-store-sync.md` | `pattern-async-status-tracking.md` |
+| Specific class names (`AiTagRecordModel`) | Generic placeholders (`TaskRecordModel`) |
+| Specific tables (`qs_ai_tag_record`) | Generic schema (`async_task`) |
+| Specific statuses (`ADOPTED`) | Generic states (`COMPLETED`) |
+
+**Principles**:
+1. **Explain WHAT and WHY**, not HOW to implement specific business
+2. **Examples can be concrete**, but **usage must be abstract**
+3. **Name by essence**, not by business feature
+
+**Check Before Creating Pattern**:
+- [ ] Does this pattern apply to multiple business scenarios?
+- [ ] Can the name describe the essence without mentioning specific business?
+- [ ] Would a developer understand the pattern without knowing the business domain?
+- [ ] Are class/table names generic or can be easily substituted?
+
+**If any answer is NO**, either:
+- Don't create a pattern file
+- Refactor to abstract the essence
+
 ---
 
 ## Step 4: Check Idempotency

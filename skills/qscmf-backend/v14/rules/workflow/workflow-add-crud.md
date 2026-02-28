@@ -562,7 +562,7 @@ class ProductController extends QsListController
 ## Related Rules
 
 - [Create Module Workflow](workflow-create-module.md) - Creating new module
-- [Table Columns Configuration](../crud/crud-table-columns-v14.md) - v14 table columns
+- [Table Columns Configuration](../crud/crud-table-columns.md) - Column types and custom renderers
 - [Form Validation](../crud/crud-form-validation.md) - Form validation rules
 - [AntdAdmin Components](../antdadmin.md) - Direct component usage
 - [ListBuilder API](../listbuilder-api.md) - Backward compatible API

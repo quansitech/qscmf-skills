@@ -31,7 +31,7 @@ QUEUE_ENV=prod QUEUE_COUNT=1 php app/queue_resque.php
 ## Defining Jobs
 
 ```php
-// app/Common/Job/SendEmailJob.php
+// Job 类文件 (如 SendEmailJob.php)
 
 namespace Common\Job;
 
@@ -111,7 +111,7 @@ public function sendNotification()
 ## Batch Processing Job
 
 ```php
-// app/Common/Job/BatchExportJob.php
+// Job 类文件 (如 BatchExportJob.php)
 
 namespace Common\Job;
 
