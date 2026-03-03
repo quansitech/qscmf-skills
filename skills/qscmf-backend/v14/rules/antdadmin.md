@@ -247,6 +247,48 @@ public function add()
 | `password($field, $title)` | Password input |
 | `hidden($field, $title)` | Hidden field |
 
+### Ueditor Configuration
+
+The Ueditor rich text editor supports custom configuration through `setConfig()`.
+
+#### Basic Usage
+
+```php
+$columns->ueditor('content', '商品详情')
+    ->setFormItemWidth(24);
+```
+
+#### Fixed Height for Modal Forms
+
+By default, Ueditor auto-grows with content (`autoHeightEnabled: true`), which can make modal forms too tall. To keep a fixed height:
+
+```php
+$columns->ueditor('content', '商品详情')
+    ->setConfig([
+        'autoHeightEnabled' => false,  // 禁用自动长高，保持固定高度
+    ])
+    ->setFormItemWidth(24);
+```
+
+This configuration:
+- Keeps the default height (500px from `initialFrameHeight`)
+- Shows scrollbar when content exceeds height
+- Users can still use the fullscreen button for more space
+- Users can drag to resize (default `scaleEnabled: false` allows this)
+
+#### Ueditor Configuration Options
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `initialFrameHeight` | 500 | 初始编辑器高度 (px) |
+| `initialFrameWidth` | 1000 | 初始编辑器宽度 (px) |
+| `autoHeightEnabled` | true | 内容增加时自动长高 |
+| `scaleEnabled` | false | 允许手动拖拽调整大小 |
+| `minFrameHeight` | 220 | 拖拽时最小高度 |
+| `fullscreen` | false | 初始化时是否全屏 |
+
+> **Tip**: For modal forms, only `autoHeightEnabled: false` is needed. The default height (500px) and drag-to-resize behavior are usually sufficient
+
 ### Form Validation Rules
 
 ```php

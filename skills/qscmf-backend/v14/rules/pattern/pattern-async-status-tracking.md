@@ -345,6 +345,62 @@ const STATUS_PARTIAL_SUCCESS = 4;  // 部分成功
 `fail_count` int(11) DEFAULT 0,
 ```
 
+### 双表架构（状态表 + 历史表）
+
+适用于需要追溯每次执行详情的场景（如外部 API 同步）。
+
+```
+sync_status (状态表)                  sync_process (历史表)
+┌─────────────────────┐              ┌─────────────────────────┐
+│ id                  │              │ id                      │
+│ type                │◄─────────────│ type                    │
+│ relate_id           │              │ relate_id               │
+│ latest_process_id ──┼─────────────►│ task_id (外部API)       │
+│ status              │              │ status                  │
+│ retry_count         │              │ sync_data (JSON)        │
+│ last_sync_time      │              │ error_message           │
+└─────────────────────┘              └─────────────────────────┘
+```
+
+**职责划分**:
+- **状态表**: 记录每个业务对象的最新状态（1:1）
+- **历史表**: 记录每次执行的详细信息（1:N），支持重试和追溯
+
+**表结构**:
+```sql
+-- 状态表
+CREATE TABLE `sync_status` (
+    `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+    `type` varchar(50) NOT NULL COMMENT '业务类型',
+    `relate_id` int(11) unsigned NOT NULL COMMENT '关联业务ID',
+    `latest_process_id` int(11) unsigned DEFAULT NULL COMMENT '最新处理记录ID',
+    `status` tinyint(1) NOT NULL DEFAULT '0',
+    `retry_count` int(3) DEFAULT 0,
+    `last_sync_time` int(11) unsigned DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_type_relate` (`type`, `relate_id`)
+);
+
+-- 历史表
+CREATE TABLE `sync_process` (
+    `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+    `type` varchar(50) NOT NULL,
+    `relate_id` int(11) unsigned NOT NULL,
+    `task_id` varchar(100) DEFAULT NULL COMMENT '外部任务ID',
+    `status` tinyint(1) NOT NULL DEFAULT '0',
+    `sync_data` text COMMENT '同步数据快照(JSON)',
+    `error_message` text,
+    `create_date` int(11) unsigned DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    KEY `idx_type_relate` (`type`, `relate_id`)
+);
+```
+
+**使用场景**:
+- 外部系统同步（知识库、搜索索引、CDN）
+- 需要关联外部任务 ID 的场景
+- 需要保留执行历史的审计场景
+
 ---
 
 ## 相关模式
