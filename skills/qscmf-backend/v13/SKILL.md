@@ -118,6 +118,7 @@ lara/tests/Feature/ProductTest.php
 4. [ ] Implement business logic in save() method
 5. [ ] Add dependency checks in delete() method
 6. [ ] Run tests: `vendor/bin/phpunit lara/tests/Feature/ProductTest.php`
+7. [ ] Create API documentation: `docs/openapi.json` (if API controller generated)
 ```
 
 ---
@@ -416,6 +417,7 @@ See: [rules/legacy-jquery.md](rules/legacy-jquery.md)
 - [Response Format](rules/api/api-response-format.md) - JSON response format
 - [Pagination Cursor](rules/api/api-pagination-cursor.md) - Pagination strategies
 - [Auth JWT](rules/api/api-auth-jwt.md) - JWT authentication
+- [Documentation](rules/api/api-documentation.md) - OpenAPI/Apifox documentation
 
 ### Test Rules
 - [TDD First](rules/test/test-tdd-first.md) - Test-driven development

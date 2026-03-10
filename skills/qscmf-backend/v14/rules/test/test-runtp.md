@@ -289,3 +289,52 @@ public function testWithCleanup()
     }
 }
 ```
+
+
+## API 控制器测试
+
+### 基本用法
+
+```php
+use Testing\MakesHttpRequests;
+
+class ApiTest extends TestCase
+{
+    use MakesHttpRequests;
+
+    public function testApiResponse()
+    {
+        $response = $this->getJson('/api/product?page=1&per_page=10');
+        $data = json_decode($response, true);
+
+        $this->assertEquals(1, $data['status']);
+        $this->assertArrayHasKey('data', $data);
+    }
+}
+```
+
+### get() vs getJson()
+
+| 方法 | Accept 头 | 响应格式 | 使用场景 |
+|------|-----------|----------|----------|
+| `get()` | 无 | XML | 页面测试 |
+| `getJson()` | `application/json` | JSON | API 测试 |
+
+### 控制器响应模式
+
+API 控制器应直接调用 `$this->response()`：
+
+```php
+// ✅ 正确
+public function gets()
+{
+    $res = ['list' => $list, 'count' => $count];
+    $this->response("成功", 1, $res);
+}
+```
+
+## 相关文档
+
+- [test-tdd-first.md](test-tdd-first.md) - TDD 工作流
+- [test-transaction.md](test-transaction.md) - 数据库事务
+- [test-wall-mock.md](test-wall-mock.md) - 外部 API Mock

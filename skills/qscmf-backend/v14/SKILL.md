@@ -131,6 +131,7 @@ Create files in proper directories. Skip if file exists (unless `--force`).
 - [ ] Write tests: `vendor/bin/phpunit lara/tests/Feature/{Name}Test.php`
 - [ ] Configure cache if needed
 - [ ] Add business logic to save() method
+- [ ] Create API documentation: `docs/openapi.json` (if API controller generated)
 
 ### References
 - [ListBuilder API](rules/listbuilder-api.md)
@@ -267,196 +268,11 @@ class ProductModel extends GyListModel
 
 ## v14-Specific Features
 
-### Inertia.js Integration
+v14 introduces Inertia.js integration and direct AntdAdmin component usage. See [v14-Specific Features](rules/v14-features.md) for:
 
-v14 supports Inertia.js for SPA-like navigation.
-
-#### HasLayoutProps Trait
-
-```php
-use Qscmf\Lib\Inertia\HasLayoutProps;
-
-class DashboardController extends QsListController
-{
-    use HasLayoutProps;
-
-    public function index()
-    {
-        $this->shareLayoutProps([
-            'title' => 'Dashboard',
-            'breadcrumbs' => [
-                ['title' => 'Home', 'href' => '/'],
-                ['title' => 'Dashboard'],
-            ],
-        ]);
-
-        // ... rest of controller
-    }
-}
-```
-
-#### X-Inertia Header Detection
-
-```php
-public function detail()
-{
-    $data = D('Product')->find(I('get.id'));
-
-    if ($this->isInertiaRequest()) {
-        // Return Inertia props for SPA navigation
-        return Inertia::render('Product/Detail', [
-            'product' => $data,
-        ]);
-    }
-
-    // Traditional page render
-    $this->assign('data', $data);
-    $this->display();
-}
-
-protected function isInertiaRequest(): bool
-{
-    return !empty($_SERVER['HTTP_X_INERTIA']);
-}
-```
-
-### Direct AntdAdmin Component Usage
-
-For advanced scenarios beyond ListBuilder, use direct AntdAdmin components.
-
-#### Table Component
-
-```php
-use AntdAdmin\Component\Table;
-use AntdAdmin\Component\Table\Pagination;
-use AntdAdmin\Component\Modal\Modal;
-
-public function index()
-{
-    $model = D('Product');
-    $count = $model->count();
-    $page = new \Gy_Library\GyPage($count);
-
-    $data_list = $model->page($page->nowPage, $page->listRows)->select();
-
-    $table = new Table();
-    $table->setMetaTitle('商品列表')
-        ->actions(function (Table\ActionsContainer $container) {
-            $container->button('新增')
-                ->setProps(['type' => 'primary'])
-                ->modal((new Modal())
-                    ->setWidth('800px')
-                    ->setUrl(U('add'))
-                    ->setTitle('新增商品'));
-            $container->forbid();
-            $container->resume();
-            $container->delete();
-        })
-        ->columns(function (Table\ColumnsContainer $container) {
-            $container->text('product_name', '商品名称');
-            $container->select('status', '状态')
-                ->setValueEnum(DBCont::getStatusList())
-                ->setBadge([1 => 'success', 0 => 'default']);
-            $container->number('sort', '排序')
-                ->editable();
-            $container->action('', '操作')
-                ->actions(function (Table\ColumnType\ActionsContainer $container) {
-                    $container->edit()->modal(
-                        (new Modal())
-                            ->setWidth('800px')
-                            ->setUrl(U('edit', ['id' => '__id__']))
-                            ->setTitle('编辑')
-                    );
-                    $container->delete();
-                });
-        })
-        ->setDataSource($data_list)
-        ->setPagination(new Pagination($page->nowPage, $page->listRows, $count))
-        ->render();
-}
-```
-
-#### Form Component
-
-```php
-use AntdAdmin\Component\Form;
-use AntdAdmin\Component\ColumnType\RuleType\Required;
-
-public function add()
-{
-    if (IS_POST) {
-        $data = I('post.');
-        $result = D('Product')->createAdd($data);
-        if ($result === false) {
-            $this->error(D('Product')->getError());
-        }
-        $this->success('添加成功');
-    }
-
-    $form = new Form();
-    $form->setSubmitRequest('post', U('add'))
-        ->setInitialValues(['status' => 1])
-        ->columns(function (Form\ColumnsContainer $columns) {
-            $columns->text('product_name', '商品名称')
-                ->addRule(new Required())
-                ->setFormItemWidth(24);
-
-            $columns->select('cate_id', '分类')
-                ->setValueEnum(D('Category')->getField('id,name'))
-                ->addRule(new Required())
-                ->setFormItemWidth(24);
-
-            $columns->image('cover_id', '封面图')
-                ->setUploadRequest(\FormItem\ObjectStorage\Lib\Common::genItemDataUrl('image'))
-                ->setCrop('16/9')
-                ->setFormItemWidth(24);
-
-            $columns->number('sort', '排序')
-                ->setFormItemWidth(12);
-
-            $columns->select('status', '状态')
-                ->setValueEnum(DBCont::getStatusList())
-                ->setFormItemWidth(12);
-        })
-        ->actions(function (Form\ActionsContainer $actions) {
-            $actions->button('提交')->submit();
-            $actions->button('重置')->reset();
-        });
-
-    return $form->render();
-}
-```
-
-### ListAdapter Pattern
-
-The ListAdapter converts ListBuilder calls to AntdAdmin components internally.
-
-```
-User Code (ListBuilder API)
-         ↓
-    ListBuilder
-         ↓
-    ListAdapter (converts to AntdAdmin format)
-         ↓
-    AntdAdmin\Component\Table
-         ↓
-    React Rendering
-```
-
-For custom rendering, extend the adapter:
-
-```php
-use Qscmf\Builder\ListAdapter;
-
-class CustomListAdapter extends ListAdapter
-{
-    protected function convertColumn($name, $title, $type, $value)
-    {
-        // Custom column conversion logic
-        return parent::convertColumn($name, $title, $type, $value);
-    }
-}
-```
+- **Inertia.js Integration** - SPA-like navigation with HasLayoutProps trait
+- **Direct AntdAdmin Components** - Table/Form components for advanced scenarios
+- **ListAdapter Pattern** - Custom rendering layer
 
 ---
 
@@ -533,80 +349,11 @@ public function test_external_api_with_mock(): void
 
 ## Common Code Patterns
 
-### Abstract Base Class Pattern
+Reusable patterns for common scenarios. See [Common Patterns](rules/common-patterns.md) for details:
 
-For multiple similar modules:
-
-```php
-<?php
-// Common/Model/CategoryModel.class.php
-abstract class CategoryModel extends GyListModel
-{
-    protected abstract function getTableName(): string;
-    protected abstract function getModuleTitle(): string;
-
-    public function getTree(): array
-    {
-        return $this->where(['status' => DBCont::NORMAL_STATUS])
-            ->order('sort asc')
-            ->select();
-    }
-}
-
-// Common/Model/ProductCateModel.class.php
-class ProductCateModel extends CategoryModel
-{
-    protected function getTableName(): string { return 'product_cate'; }
-    protected function getModuleTitle(): string { return '商品分类'; }
-}
-```
-
-### Redis Lock for Concurrency
-
-```php
-use Qscmf\Lib\Redis\RedisLock;
-
-public function batchProcess()
-{
-    $lock = new RedisLock('batch_process_' . $this->uid);
-
-    if (!$lock->acquire()) {
-        $this->error('操作进行中，请稍候');
-    }
-
-    try {
-        // Process batch
-        $result = $this->doBatchProcess();
-        $lock->release();
-        return $result;
-    } catch (\Exception $e) {
-        $lock->release();
-        throw $e;
-    }
-}
-```
-
-### Queue Job Pattern
-
-```php
-// Create job
-use Qscmf\Lib\Queue\QueueJob;
-
-class ExportJob extends QueueJob
-{
-    public function handle(): void
-    {
-        $data = $this->getData();
-        // Process export...
-    }
-}
-
-// Dispatch job
-QueueJob::dispatch(ExportJob::class, [
-    'module' => 'Product',
-    'filters' => $filters,
-]);
-```
+- **Abstract Base Class** - Multiple similar modules with shared logic
+- **Redis Lock** - Concurrency control for batch operations
+- **Queue Job** - Async task processing
 
 ---
 
@@ -631,6 +378,8 @@ QueueJob::dispatch(ExportJob::class, [
 - [Field Type Inference](rules/field-type-inference.md) - Three-layer inference strategy
 
 ### v14 Specific
+- [v14-Specific Features](rules/v14-features.md) - Inertia.js, AntdAdmin components, ListAdapter
+- [Common Patterns](rules/common-patterns.md) - Abstract base, Redis lock, Queue job
 - [Inertia.js Integration](rules/inertia.md) - SPA navigation with Inertia
 - [AntdAdmin Components](rules/antdadmin.md) - Direct component usage
 
@@ -648,6 +397,7 @@ QueueJob::dispatch(ExportJob::class, [
 - [Response Format](rules/api/api-response-format.md) - Standard JSON response
 - [Pagination](rules/api/api-pagination-cursor.md) - Cursor/offset pagination
 - [JWT Auth](rules/api/api-auth-jwt.md) - JWT authentication
+- [Documentation](rules/api/api-documentation.md) - OpenAPI/Apifox documentation
 
 ### Testing
 - [TDD First](rules/test/test-tdd-first.md) - Test-driven development
