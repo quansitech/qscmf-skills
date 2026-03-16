@@ -10,6 +10,8 @@
 | PHPUnit | ^9.3.0 |
 | Laravel | ^8.0 |
 
+
+> **⚠️ CRITICAL**: 在 `lara/tests/` 中，**禁止直接使用 `D()` 函数**。必须使用 `runTp()` 包装 ThinkPHP 逻辑。详见 [runTp Wrapper](../rules/test/test-runtp-wrapper.md)。
 ## 测试环境配置
 
 ### 配置文件

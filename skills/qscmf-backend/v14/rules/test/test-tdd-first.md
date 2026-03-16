@@ -30,6 +30,42 @@ PHPUnit 10 introduces several important changes from PHPUnit 9:
 
 ---
 
+## Test Naming Convention (CRITICAL)
+
+**Always use `test` prefix** - Never use `@test` annotation.
+
+### Format
+
+```
+test{FeatureDescription}{ExpectedResult}
+```
+
+### Examples
+
+```php
+// ✅ Correct - test prefix style
+public function testPrivateProjectWithoutTeamNotInSortableList(): void
+public function testEmptySortingCannotFinish(): void
+public function testSortingBooksCopiedAfterFinish(): void
+
+// ❌ Wrong - @test annotation (deprecated)
+/**
+ * @test
+ */
+public function privateProjectWithoutTeamNotInSortableList(): void
+```
+
+### Naming Patterns
+
+| Pattern | Example | Description |
+|---------|---------|-------------|
+| `{condition}Not{expected}` | `testPrivateProjectWithoutTeamNotInSortableList` | Negative assertion |
+| `{action}Cannot{complete}` | `testEmptySortingCannotFinish` | Action blocked |
+| `{action}{result}` | `testSortingBooksCopiedAfterFinish` | Action completed |
+| `{field}Equals{source}` | `testDetailCreateDateEqualsSortingCreateDate` | Value comparison |
+
+---
+
 ## TDD Workflow
 
 ### Red-Green-Refactor Cycle
@@ -290,4 +326,5 @@ class ProductTest extends TestCase
 
 - [Test Wall Mock](test-wall-mock.md) - Mocking external services
 - [Test Transaction](test-transaction.md) - Transaction testing
+- [CLI Controller Testing](test-cli-controller.md) - CLI 控制器测试模式
 - [Testing Reference](../../references/testing.md) - Complete testing guide

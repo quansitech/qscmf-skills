@@ -19,6 +19,42 @@ Test-Driven Development workflow for QSCMF v13.
 
 ## TDD Workflow
 
+### Test Naming Convention (CRITICAL)
+
+**Always use `test` prefix** - Never use `@test` annotation.
+
+#### Format
+
+```
+test{FeatureDescription}{ExpectedResult}
+```
+
+#### Examples
+
+```php
+// ✅ Correct - test prefix style
+public function testPrivateProjectWithoutTeamNotInSortableList()
+public function testEmptySortingCannotFinish()
+public function testSortingBooksCopiedAfterFinish()
+
+// ❌ Wrong - @test annotation (deprecated in PHPUnit 10)
+/**
+ * @test
+ */
+public function privateProjectWithoutTeamNotInSortableList()
+```
+
+#### Naming Patterns
+
+| Pattern | Example | Description |
+|---------|---------|-------------|
+| `{condition}Not{expected}` | `testPrivateProjectWithoutTeamNotInSortableList` | Negative assertion |
+| `{action}Cannot{complete}` | `testEmptySortingCannotFinish` | Action blocked |
+| `{action}{result}` | `testSortingBooksCopiedAfterFinish` | Action completed |
+| `{field}Equals{source}` | `testDetailCreateDateEqualsSortingCreateDate` | Value comparison |
+
+---
+
 ### Red-Green-Refactor Cycle
 
 ```

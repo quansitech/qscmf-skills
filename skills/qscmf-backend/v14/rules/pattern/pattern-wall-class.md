@@ -225,6 +225,99 @@ class SmsWall
 
 ---
 
+## SDK Proxy Pattern（零改动注入）
+
+> 适用于：代理第三方 SDK，Mock 粒度在最终请求层
+
+### 核心思想
+
+当业务代码使用第三方 SDK 时，通过 **属性代理** 封装 SDK，仅修改构造函数注入方式，实现：
+- 业务代码 **零改动**
+- Mock 粒度在 `execute()` 层（HTTP 请求前最后一步）
+- 上游参数构建、验证逻辑 **全被测试覆盖**
+
+### Wall 类结构（伪代码）
+
+```php
+// 伪代码：SDK 代理 Wall
+
+namespace Common\Lib\Wall;
+
+/**
+ * 代理第三方 SDK，支持容器注入 Mock
+ */
+class SdkClientWall
+{
+    protected $realClient;  // 真实 SDK 实例
+
+    public function __construct()
+    {
+        $this->realClient = new \Vendor\Sdk\Client();
+    }
+
+    // 代理属性设置（透明传递）
+    public function __set($name, $value)
+    {
+        $this->realClient->$name = $value;
+    }
+
+    // 代理属性获取（透明传递）
+    public function __get($name)
+    {
+        return $this->realClient->$name;
+    }
+
+    // 执行请求（Mock 点）
+    public function execute($request, $token = null)
+    {
+        return $this->realClient->execute($request, $token);
+    }
+}
+```
+
+### 业务代码改动（仅构造函数）
+
+```php
+// 伪代码：业务服务类
+
+class ExternalService
+{
+    public $client;  // 保持原属性名
+
+    public function __construct()
+    {
+        // BEFORE: $this->client = new \Vendor\Sdk\Client();
+        // AFTER:  仅此一行改动
+        $this->client = app()->make(SdkClientWall::class);
+
+        // 以下完全不变
+        $this->client->apiKey = config('api.key');
+    }
+
+    // 所有方法调用完全不变
+    public function doSomething($data)
+    {
+        $this->client->someProperty = 'value';
+        return $this->client->execute($request);
+    }
+}
+```
+
+### 模式对比
+
+| 模式 | Mock 粒度 | 业务改动 | 上游逻辑覆盖 |
+|------|----------|---------|-------------|
+| **Setter 注入** | 方法层 | 需添加 setter | 部分 |
+| **SDK Proxy** | execute() 层 | 仅构造函数 1 行 | 完整 |
+
+### 适用场景
+
+- 第三方 SDK（支付、物流、短信、云服务等）
+- 需要 Mock HTTP 层但保留业务逻辑测试
+- 追求最小化代码改动
+
+---
+
 ## Benefits
 
 1. **Testability** - Easy to mock in tests
@@ -232,6 +325,7 @@ class SmsWall
 3. **Error handling** - Consistent error responses
 4. **Configuration** - Centralized API settings
 5. **Logging** - Easy to add logging/debugging
+6. **Zero Change Injection** - SDK Proxy pattern enables minimal code change
 
 ---
 
