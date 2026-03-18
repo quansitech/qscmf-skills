@@ -66,6 +66,39 @@ app/
 3. **Directory Organization**: Organize by feature/domain, not by type
 4. **Consistent Naming**: Use clear, descriptive names
 
+### Core Design Principles
+
+| 原则 | 全称 | 简述 |
+|------|------|------|
+| **DRY** | Don't Repeat Yourself | 重复代码提取为私有方法或公共组件 |
+| **SOLID** | - | 面向对象设计五大原则 |
+| ├ S | Single Responsibility | 单一职责：一个类只做一件事 |
+| ├ O | Open/Closed | 开闭原则：对扩展开放，对修改关闭 |
+| ├ L | Liskov Substitution | 里氏替换：子类可替换父类 |
+| ├ I | Interface Segregation | 接口隔离：接口要小而专 |
+| └ D | Dependency Inversion | 依赖倒置：依赖抽象而非具体 |
+| **KISS** | Keep It Simple, Stupid | 保持简单，避免过度设计 |
+| **YAGNI** | You Aren't Gonna Need It | 只实现当前需要的功能 |
+
+```php
+// ✅ DRY - 提取重复逻辑
+private function buildParams(array $data_a, array $data_b, int $count): array
+{
+    return ['field' => $data_a['field'], 'count' => $count];
+}
+
+// ✅ SRP - 单一职责
+class OrderService { /* 只处理订单逻辑 */ }
+class PaymentService { /* 只处理支付逻辑 */ }
+
+// ❌ 违反 SRP
+class OrderController {
+    public function process() {
+        // 订单 + 支付 + 通知 + 日志 全在一起
+    }
+}
+```
+
 ## Coding Standards
 
 ### PSR-12 Compliance

@@ -1,6 +1,20 @@
 # Testing
 
-PHPUnit testing guide for QSCMF v14.
+> PHPUnit testing guide for QSCMF v14.
+
+## 通用测试命令
+
+> **重要**: 关闭 xdebug 以加速测试。详见 [Testing Common Commands](_shared/references/testing-common.md)
+
+```bash
+# 定义基础命令
+PHPUNIT="php -d display_errors=on -d xdebug.mode=off -d xdebug.start_with_request=0 vendor/bin/phpunit"
+
+# 运行测试
+$PHPUNIT                                    # 全部测试
+$PHPUNIT lara/tests/Feature/ProductTest.php # 单个测试类
+$PHPUNIT --filter "testMethodName"          # 单个测试方法
+```
 
 ## Test Structure
 
@@ -23,13 +37,6 @@ class ProductTest extends TestCase
 }
 ```
 
-## Run Tests
-
-```bash
-vendor/bin/phpunit
-vendor/bin/phpunit lara/tests/Feature/ProductTest.php
-```
-
 ## Assertions
 
 ```php
@@ -42,5 +49,6 @@ $this->assertDatabaseHas('product', ['id' => 1]);
 ---
 
 ## Related Documentation
+- [Testing Common Commands](_shared/references/testing-common.md) - 通用测试命令
 - [TDD First](../rules/test/test-tdd-first.md)
 - [Wall Mock](../rules/test/test-wall-mock.md)

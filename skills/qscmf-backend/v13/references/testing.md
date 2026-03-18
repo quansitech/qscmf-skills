@@ -454,32 +454,25 @@ class ValidationTest extends TestCase
 
 ## 测试命令
 
-### 常用命令
+> **通用测试命令**: 详见 [_shared/references/testing-common.md](_shared/references/testing-common.md)
+
+### 基础命令（推荐）
 
 ```bash
+# 定义基础命令别名
+PHPUNIT="php -d display_errors=on -d xdebug.mode=off -d xdebug.start_with_request=0 vendor/bin/phpunit"
+
 # 运行所有测试
-vendor/bin/phpunit
+$PHPUNIT
 
-# 运行特定文件
-vendor/bin/phpunit lara/tests/Feature/ProductTest.php
+# 运行单个测试类
+$PHPUNIT lara/tests/Feature/ProductTest.php
 
-# 运行特定方法
-vendor/bin/phpunit --filter testCreate
-
-# 运行特定测试套件
-vendor/bin/phpunit --testsuite Feature
-
-# 生成代码覆盖率报告
-vendor/bin/phpunit --coverage-html coverage
-
-# 并行测试
-vendor/bin/paratest
-
-# 只运行快速测试
-vendor/bin/phpunit --exclude-group slow
+# 运行单个测试方法
+$PHPUNIT --filter "testMethodName" lara/tests/Feature/ProductTest.php
 
 # 详细输出
-vendor/bin/phpunit -v
+$PHPUNIT -v
 ```
 
 ## 测试最佳实践
