@@ -4,6 +4,33 @@
 
 This document extends the common coding style rules with PHP 8.2+ specific patterns and conventions used in QSMCF development.
 
+## Naming Conventions (CRITICAL)
+
+| Element | Convention | Example |
+|---------|------------|---------|
+| **Variables** | `snake_case` | `$project_ids`, `$complete_time` |
+| **Methods** | `camelCase` | `getStatData()`, `buildCityCondition()` |
+| **Private Filters** | `_camelCase` | `_yearFilter()`, `_cityFilter()` |
+| **Constants** | `UPPER_SNAKE_CASE` | `PROJECT_BASE_MAP` |
+| **Database Fields** | `snake_case` | `create_date`, `project_status` |
+
+```php
+// ✅ Good
+private function getStatData(array $filters = []): array
+{
+    $project_ids = [];
+    $complete_time = $filters['complete_time'] ?? null;
+    return $this->calculateResult($project_ids, $complete_time);
+}
+
+// ❌ Bad
+private function getStatData(array $filters = []): array
+{
+    $projectIds = [];           // Should be snake_case
+    return $this->calculate_result(...);  // Method should be camelCase
+}
+```
+
 ## Modern PHP Features
 
 ### Type Declarations
