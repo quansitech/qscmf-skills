@@ -28,6 +28,56 @@ Constants for common status values:
 - `DBCont::FORBIDDEN_STATUS` = 0 (disabled/inactive)
 - `DBCont::AUDIT_STATUS` = 2 (pending review)
 
+### DBCont 常量模式 (Magic Static Pattern)
+DBCont 使用魔术函数 `__callStatic` 实现常量映射系统，只需定义常量和私有数组即可自动获得 getter 方法。
+
+#### 核心设计
+```php
+class DBCont {
+    // 常量定义 - 使用语义化的名称和值
+    public const ENUM_TYPE_A = 'type_a';
+    public const ENUM_TYPE_B = 'type_b';
+    public const ENUM_TYPE_C = 'type_c';
+
+    // 私有数组映射 - 将常量值映射为可读文本
+    static private array $_enum_type = [
+        self::ENUM_TYPE_A => 'Type A',
+        self::ENUM_TYPE_B => 'Type B',
+        self::ENUM_TYPE_C => 'Type C',
+    ];
+
+    // 魔术方法自动生成 getter
+    static public function __callStatic($name, $arguments)
+    {
+        // 自动解析 getXXXList() 和 getXXX() 格式的方法
+        // 例如：getEnumTypeList() -> $_enum_type
+        //       getEnumType('type_a') -> $_enum_type['type_a']
+    }
+}
+```
+
+#### 自动生成的方法
+```php
+// 获取完整枚举列表
+DBCont::getEnumTypeList();
+// 返回: ['type_a' => 'Type A', 'type_b' => 'Type B', 'type_c' => 'Type C']
+
+// 获取单个枚举值
+DBCont::getEnumType('type_a');
+// 返回: 'Type A'
+```
+
+#### 优势
+1. **类型安全**：使用常量避免字符串拼写错误
+2. **易于维护**：只需定义常量和映射数组，方法自动生成
+3. **一致性**：所有枚举遵循相同的命名和调用方式
+4. **减少重复**：避免为每个枚举写重复的 getter 方法
+
+#### 命名规范
+- 常量：`UPPER_SNAKE_CASE` + 语义化前缀（如 `ENUM_TYPE_`）
+- 私有数组：`$_` + `lower_case` 名称
+- 方法：自动生成 `getXXXList()` 和 `getXXX()`
+
 ### Migration Metadata
 System for storing and using table schema information for code generation:
 - Field types and validation rules

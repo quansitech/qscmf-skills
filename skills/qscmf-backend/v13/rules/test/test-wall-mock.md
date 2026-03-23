@@ -388,6 +388,62 @@ public function testBusinessLogic(): void
 
 ---
 
+## HTTP 集成测试 + Mock（推荐）
+
+**核心原则**：准备数据、设置 Mock、执行测试、验证结果 - 都不用 runTp
+
+```php
+/** @test */
+public function controller_with_mocked_external_api(): void
+{
+    // 1. 准备数据 - DB facade（不用 runTp）
+    $recordId = DB::table('qs_some_table')->insertGetId([
+        'field_a' => 'test_value',
+        'status' => 1,
+        'create_date' => time(),
+    ]);
+
+    // 2. 设置 Mock - app()->instance()（不用 runTp）
+    $mockResponse = (object)[
+        'status' => 'success',
+        'data' => ['id' => 'MOCK_001'],
+    ];
+
+    $mock = $this->createMock(\Common\Lib\Wall\ExternalApiWall::class);
+    $mock->method('execute')->willReturn($mockResponse);
+    app()->instance(\Common\Lib\Wall\ExternalApiWall::class, $mock);
+
+    // 3. 执行 - HTTP GET（不用 runTp）
+    $response = $this->get('/SomeController/someAction');
+
+    // 4. 验证结果 - DB facade（不用 runTp）
+    $result = DB::table('qs_some_table')->where('id', $recordId)->first();
+    $this->assertEquals(2, $result->status, '状态应已更新');
+}
+```
+
+### 关键原则
+
+**优先级**：HTTP 测试优先，runTp 仅在无法使用 HTTP 时使用。
+
+| 操作 | 方法 | 优先级 |
+|------|------|--------|
+| 准备数据 | `DB::table()` | ✅ 优先 |
+| 设置 Mock | `app()->instance()` | ✅ 优先 |
+| 执行测试 | HTTP GET/POST | ✅ 优先 |
+| 验证结果 | `DB::table()` | ✅ 优先 |
+| ThinkPHP 配置 | `runTp(fn() => C())` | ⚠️ 最后手段 |
+
+### 性能对比
+
+| 方法 | 耗时 | 优先级 |
+|------|------|--------|
+| HTTP + Mock | ~50ms | ✅ 推荐 |
+| `DB::table()` | ~10ms | ✅ 推荐 |
+| `runTp()` | ~500ms | ⚠️ 最后手段 |
+
+---
+
 ## Related Rules
 
 - [TDD First](test-tdd-first.md) - Test-driven development
