@@ -420,7 +420,9 @@ See: [rules/legacy-jquery.md](rules/legacy-jquery.md)
 - [Documentation](rules/api/api-documentation.md) - OpenAPI/Apifox documentation
 
 ### Test Rules
-- [TDD First](rules/test/test-tdd-first.md) - Test-driven development
+- [HTTP First Testing](rules/test/test-http-first.md) - ⚡ PREFERRED: HTTP integration tests (~50ms vs ~500ms)
+- [runTp Wrapper](rules/test/test-runtp-wrapper.md) - CRITICAL: Wrap ThinkPHP logic in runTp() (last resort)
+- [TDD First](rules/test/test-tdd-first.md) - Test-driven development with test + camelCase naming
 - [Wall Mock](rules/test/test-wall-mock.md) - Mocking external services
 - [Transaction](rules/test/test-transaction.md) - Database transaction testing
 
@@ -485,11 +487,11 @@ php artisan migrate
 # Rollback migration
 php artisan migrate:rollback
 
-# Run tests
-vendor/bin/phpunit
-
-# Run specific test
-vendor/bin/phpunit lara/tests/Feature/ProductTest.php
+# Run tests (关闭 xdebug 加速)
+PHPUNIT="php -d display_errors=on -d xdebug.mode=off -d xdebug.start_with_request=0 vendor/bin/phpunit"
+$PHPUNIT                                    # 全部测试
+$PHPUNIT lara/tests/Feature/ProductTest.php # 单个测试类
+$PHPUNIT --filter "testCreate"              # 单个测试方法
 
 # CLI execution
 php www/index.php Admin/Product/index

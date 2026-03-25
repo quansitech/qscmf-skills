@@ -452,6 +452,72 @@ class ValidationTest extends TestCase
 }
 ```
 
+## CLI 测试
+
+### CLI 入口点
+
+CLI 入口文件在 `app/` 目录，不是 `www/index.php`：
+
+```
+app/jdInfoRefresh  → JDInfoRefreshController
+app/queue          → QueueController
+app/batchExport    → BatchExportController
+```
+
+### CLI 测试模式
+
+```php
+/** @test */
+public function testCliUpdatesStatus(): void
+{
+    // 1. 准备数据 - DB facade
+    $waybillId = DB::table('qs_jd_waybill')->insertGetId([
+        'order_id' => 'JD' . time(),
+        'order_status' => 0,
+    ]);
+
+    // 2. 设置配置 - runTp (仅此处需要)
+    $this->runTp(fn() => C('CANCEL_JD_WAYBILL', true));
+
+    // 3. 执行 CLI
+    $this->cli('app/jdInfoRefresh', 'info');
+
+    // 4. 验证结果 - DB facade
+    $result = DB::table('qs_jd_waybill')->where('id', $waybillId)->first();
+    $this->assertEquals(1, $result->order_status);
+}
+```
+
+### HTTP 集成测试（推荐）
+
+> **优先使用 HTTP 测试** - 性能更好（~50ms vs ~500ms）
+
+```php
+/** @test */
+public function testHttpUpdatesStatusWithMock(): void
+{
+    // 1. 准备数据 - DB facade (不用 runTp)
+    $waybillId = DB::table('qs_jd_waybill')->insertGetId([
+        'order_id' => 'JD' . time(),
+        'order_status' => 0,
+    ]);
+
+    // 2. 设置 Mock - app()->instance() (不用 runTp)
+    $mock = $this->createMock(\Common\Lib\Wall\JdClientWall::class);
+    $mock->method('execute')->willReturn(['success' => true, 'orderStatus' => 2]);
+    app()->instance(\Common\Lib\Wall\JdClientWall::class, $mock);
+
+    // 3. 执行 - HTTP GET (不用 runTp)
+    $response = $this->get('/JDInfoRefresh/info');
+
+    // 4. 验证结果 - DB facade (不用 runTp)
+    $result = DB::table('qs_jd_waybill')->where('id', $waybillId)->first();
+    $this->assertEquals(2, $result->order_status);
+}
+```
+
+> 详见: [HTTP First Testing](../rules/test/test-http-first.md)
+
 ## 测试命令
 
 > **通用测试命令**: 详见 [_shared/references/testing-common.md](_shared/references/testing-common.md)
@@ -479,15 +545,35 @@ $PHPUNIT -v
 
 ### 1. 命名规范
 
+**格式**: `test` + `camelCase`
+
 ```php
-// 好的命名
+// ✅ 正确 - test + camelCase
 public function testCreateOrderWithValidData(): void {}
 public function testCreateOrderFailsWhenStockIsInsufficient(): void {}
+public function testYearFilter(): void {}
+public function testCompleteTimeBoundary(): void {}
+public function testYearAndCompleteTimeCombined(): void {}
 
-// 不好的命名
-public function testOrder(): void {}
-public function test1(): void {}
+// ❌ 错误 - snake_case
+public function test_create_order(): void {}
+public function test_year_filter(): void {}
+
+// ❌ 错误 - 无 test 前缀
+public function createOrder(): void {}
+public function yearFilter(): void {}
 ```
+
+### 测试命名模式
+
+| 模式 | 示例 | 说明 |
+|------|------|------|
+| `test{Action}` | `testCreateOrder()` | 基础动作测试 |
+| `test{Action}{Result}` | `testCreateOrderReturnsId()` | 动作+结果 |
+| `test{Condition}{Expected}` | `testEmptySortingCannotFinish()` | 条件+期望 |
+| `test{Field}{Comparison}` | `testDetailCreateDateEqualsSortingCreateDate()` | 字段比较 |
+| `test{Filter}` | `testYearFilter()` | 单个过滤器 |
+| `test{Filter}And{Filter}` | `testYearAndStatusFilter()` | 多条件组合 |
 
 ### 2. 单一职责
 
