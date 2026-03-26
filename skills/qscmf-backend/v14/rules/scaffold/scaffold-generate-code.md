@@ -1,5 +1,6 @@
 ---
 title: Scaffold Generate Code (v14)
+version: v14
 impact: CRITICAL
 impactDescription: Required for all code generation
 tags: scaffold, generate, code, v14

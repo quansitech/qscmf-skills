@@ -1,5 +1,6 @@
 ---
 title: Queue Job Pattern (v14)
+version: v14
 impact: HIGH
 impactDescription: Required for async task processing
 tags: pattern, queue, job, v14

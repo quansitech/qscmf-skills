@@ -1,5 +1,6 @@
 ---
 title: Wall Class Pattern (v14)
+version: v14
 impact: HIGH
 impactDescription: Required for external API integration
 tags: pattern, wall, api, v14

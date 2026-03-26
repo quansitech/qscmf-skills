@@ -1,5 +1,6 @@
 ---
 title: Scaffold Infer Types (v14)
+version: v14
 impact: HIGH
 impactDescription: Required for accurate code generation
 tags: scaffold, infer, types, v14

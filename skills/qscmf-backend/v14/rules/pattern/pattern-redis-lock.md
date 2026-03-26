@@ -1,5 +1,6 @@
 ---
 title: Redis Lock Pattern (v14)
+version: v14
 impact: HIGH
 impactDescription: Required for concurrent operations
 tags: pattern, redis, lock, v14

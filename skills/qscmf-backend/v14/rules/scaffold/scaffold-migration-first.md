@@ -1,5 +1,6 @@
 ---
 title: Scaffold Migration First (v14)
+version: v14
 impact: HIGH
 impactDescription: Best practice for new modules
 tags: scaffold, migration, first, v14

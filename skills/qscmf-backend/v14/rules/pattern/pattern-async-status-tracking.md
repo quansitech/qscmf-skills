@@ -1,5 +1,6 @@
 ---
 title: Async Status Tracking Pattern (v14)
+version: v14
 impact: MEDIUM
 impactDescription: Pattern for tracking long-running async tasks
 tags: pattern, async, status, trait, v14

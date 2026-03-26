@@ -1,0 +1,683 @@
+# QSCMF Skill Test Cases - Offline Validation
+# 这些测试用例验证技能文件的逻辑结构，不需要调用 LLM
+#
+# 使用方法:
+#   python3 test/qscmf-backend/scripts/run_offline_tests.py
+
+suite: offline-validation
+version: "1.0"
+description: "离线测试 - 验证技能逻辑，零 token 成本"
+
+# ==================== 闭环测试用例 ====================
+
+closed_loop_tests:
+  # 测试 1: Scaffold → Verify 链路
+  - id: CL-001
+    name: "Scaffold 后 Verify 自动触发"
+    description: |
+      验证 scaffold 工作流最后一步是否引用 verify
+    file: "v14/modes/scaffold.md"
+    assertions:
+      - type: contains
+        value: "/qscmf-verify"
+        message: "Scaffold 工作流应包含验证命令"
+      - type: contains
+        value: "Step 6"
+        message: "应有 Step 6 输出步骤"
+
+  # 测试 2: Verify → Failures 链路
+  - id: CL-002
+    name: "Verify 失败记录到 failures.yaml"
+    description: |
+      验证 learn/workflow.md 是否包含失败捕获逻辑
+    file: "_shared/learn/workflow.md"
+    assertions:
+      - type: contains
+        value: "failures.yaml"
+        message: "应引用 failures.yaml"
+      - type: contains
+        value: "Failures Captured"
+        message: "应有失败捕获章节"
+
+  # 测试 3: Failures → Rules 链路
+  - id: CL-003
+    name: "失败模式可转化为规则更新"
+    description: |
+      验证 failures.yaml 格式支持规则更新
+    file: "_shared/learn/failures.yaml"
+    assertions:
+      - type: contains
+        value: "fix:"
+        message: "应包含 fix 字段（注释示例）"
+      - type: contains
+        value: "target:"
+        message: "fix 应指定目标文件（注释示例）"
+      - type: contains
+        value: "pattern:"
+        message: "应包含失败模式分类（注释示例）"
+
+# ==================== 验证系统测试 ====================
+
+verify_system_tests:
+  - id: VS-001
+    name: "Level 1 验证命令格式正确"
+    description: |
+      验证 verify.md 中的 php -l 命令格式
+    file: "v14/modes/verify.md"
+    assertions:
+      - type: contains
+        value: "php -l"
+        message: "应包含 php -l 语法检查"
+
+  - id: VS-002
+    name: "Level 2 验证命令格式正确"
+    description: |
+      验证 verify.md 中的类加载检查命令格式
+    file: "v14/modes/verify.md"
+    assertions:
+      - type: contains
+        value: "autoload.php"
+        message: "应包含 autoload 加载"
+      - type: contains
+        value: "new "
+        message: "应包含类实例化"
+
+  - id: VS-003
+    name: "验证报告格式定义完整"
+    description: |
+      验证 verify.md 中的报告格式
+    file: "v14/modes/verify.md"
+    assertions:
+      - type: regex
+        value: "\[✅\]|\[PASS\]|passed"
+        message: "应有成功标记"
+      - type: regex
+        value: "\[❌\]|\[FAIL\]|failed|error"
+        message: "应有失败标记"
+      - type: contains
+        value: "Summary"
+        message: "应有总结章节"
+
+# ==================== 字段推断测试 ====================
+
+field_inference_tests:
+  - id: FI-001
+    name: "字段类型推断规则存在"
+    description: |
+      验证 scaffold.md 包含字段类型推断逻辑
+    file: "v14/modes/scaffold.md"
+    assertions:
+      - type: contains
+        value: "Infer Field Types"
+        message: "应有字段类型推断步骤"
+      - type: contains
+        value: "*_content"
+        message: "应包含内容字段规则"
+      - type: contains
+        value: "status"
+        message: "应包含状态字段规则"
+
+# ==================== 版本检测测试 ====================
+
+version_detection_tests:
+  - id: VD-001
+    name: "版本路由表存在"
+    description: |
+      验证入口 SKILL.md 包含版本检测逻辑
+    file: "SKILL.md"
+    assertions:
+      - type: contains
+        value: "v14"
+        message: "应引用 v14"
+      - type: contains
+        value: "v13"
+        message: "应引用 v13"
+
+# ==================== 安全检查 ====================
+
+security_tests:
+  - id: SEC-001
+    name: "无危险函数模板"
+    description: |
+      确保生成的代码模板不包含危险函数
+    files:
+      - "v14/templates/*.tpl"
+      - "v13/templates/*.tpl"
+    assertions:
+      - type: not-contains
+        value: "eval("
+        message: "不应包含 eval()"
+      - type: not-contains
+        value: "exec("
+        message: "不应包含 exec()"
+      - type: not-contains
+        value: "system("
+        message: "不应包含 system()"
+
+# ==================== 模式路由测试 ====================
+
+mode_routing_tests:
+  - id: MR-001
+    name: "Scaffold 模式路由正确"
+    file: "v14/SKILL.md"
+    assertions:
+      - type: contains
+        value: "scaffold.md"
+        message: "应路由到 scaffold.md"
+
+  - id: MR-002
+    name: "Guide 模式路由正确"
+    file: "v14/SKILL.md"
+    assertions:
+      - type: contains
+        value: "guide.md"
+        message: "应路由到 guide.md"
+
+  - id: MR-003
+    name: "Learn 模式路由正确"
+    file: "v14/SKILL.md"
+    assertions:
+      - type: contains
+        value: "learn.md"
+        message: "应路由到 learn.md"
+
+  - id: MR-004
+    name: "Verify 模式路由正确"
+    file: "v14/SKILL.md"
+    assertions:
+      - type: contains
+        value: "verify.md"
+        message: "应路由到 verify.md"
+
+# ==================== 失败场景测试 ====================
+
+failure_scenario_tests:
+  - id: FS-001
+    name: "字段类型推断失败模式定义存在"
+    description: |
+      验证 failures.yaml 包含 field-type-mismatch 失败模式
+    file: "_shared/learn/failures.yaml"
+    assertions:
+      - type: contains
+        value: "field-type-mismatch"
+        message: "应包含字段类型推断失败模式"
+
+  - id: FS-002
+    name: "缺少依赖失败模式定义存在"
+    description: |
+      验证 failures.yaml 包含 missing-dependency 失败模式
+    file: "_shared/learn/failures.yaml"
+    assertions:
+      - type: contains
+        value: "missing-dependency"
+        message: "应包含缺少依赖失败模式"
+
+  - id: FS-003
+    name: "API 不匹配失败模式定义存在"
+    description: |
+      验证 failures.yaml 包含 api-mismatch 失败模式
+    file: "_shared/learn/failures.yaml"
+    assertions:
+      - type: contains
+        value: "api-mismatch"
+        message: "应包含 API 不匹配失败模式"
+
+  - id: FS-004
+    name: "验证规则缺失失败模式定义存在"
+    description: |
+      验证 failures.yaml 包含 validation-missing 失败模式
+    file: "_shared/learn/failures.yaml"
+    assertions:
+      - type: contains
+        value: "validation-missing"
+        message: "应包含验证规则缺失失败模式"
+
+  - id: FS-005
+    name: "失败记录包含必要字段"
+    description: |
+      验证 failures.yaml 定义了完整的记录格式
+    file: "_shared/learn/failures.yaml"
+    assertions:
+      - type: contains
+        value: "timestamp:"
+        message: "应包含 timestamp 字段（注释示例）"
+      - type: contains
+        value: "trigger:"
+        message: "应包含 trigger 字段（注释示例）"
+      - type: contains
+        value: "error:"
+        message: "应包含 error 字段（注释示例）"
+      - type: contains
+        value: "status:"
+        message: "应包含 status 字段（注释示例）"
+
+  - id: FS-006
+    name: "工作流包含失败模式检测步骤"
+    description: |
+      验证 learn workflow 包含失败模式检测
+    file: "_shared/learn/workflow.md"
+    assertions:
+      - type: contains
+        value: "Failure Pattern Detection"
+        message: "应包含失败模式检测章节"
+      - type: contains
+        value: "failures.yaml"
+        message: "应引用 failures.yaml"
+
+# ==================== 边界情况测试 ====================
+
+edge_case_tests:
+  - id: EC-001
+    name: "Scaffold 支持无 migration 情况"
+    description: |
+      验证 scaffold 工作流支持从现有表或用户输入获取 schema
+    file: "v14/modes/scaffold.md"
+    assertions:
+      - type: contains
+        value: "Existing database table"
+        message: "应支持从现有表读取"
+      - type: contains
+        value: "User-provided field list"
+        message: "应支持用户提供字段列表"
+
+  - id: EC-002
+    name: "字段推断支持复杂类型"
+    description: |
+      验证 field-type-inference 包含复杂字段类型规则
+    file: "v14/rules/field-type-inference.md"
+    assertions:
+      - type: contains
+        value: "*_price"
+        message: "应包含价格字段规则"
+      - type: contains
+        value: "*_amount"
+        message: "应包含金额字段规则"
+      - type: contains
+        value: "money"
+        message: "应支持 money 类型"
+
+  - id: EC-003
+    name: "Schema 元数据解析支持多种提示"
+    description: |
+      验证 field-type-inference 支持多种元数据标记
+    file: "v14/rules/field-type-inference.md"
+    assertions:
+      - type: contains
+        value: "@type="
+        message: "应支持 @type 元数据"
+      - type: contains
+        value: "@crop="
+        message: "应支持 @crop 元数据"
+      - type: contains
+        value: "@options="
+        message: "应支持 @options 元数据"
+      - type: contains
+        value: "@badge="
+        message: "应支持 @badge 元数据"
+
+  - id: EC-004
+    name: "字段推断三层策略定义完整"
+    description: |
+      验证三层推断策略都存在
+    file: "v14/rules/field-type-inference.md"
+    assertions:
+      - type: contains
+        value: "Layer 1"
+        message: "应有 Layer 1 配置层"
+      - type: contains
+        value: "Layer 2"
+        message: "应有 Layer 2 学习层"
+      - type: contains
+        value: "Layer 3"
+        message: "应有 Layer 3 默认层"
+      - type: contains
+        value: "field-rules.yaml"
+        message: "应引用配置文件"
+
+  - id: EC-005
+    name: "Scaffold TODO 列表完整"
+    description: |
+      验证 scaffold 输出完整的 TODO 列表
+    file: "v14/modes/scaffold.md"
+    assertions:
+      - type: contains
+        value: "TODO List"
+        message: "应有 TODO 列表章节"
+      - type: contains
+        value: "Required"
+        message: "应有必需项"
+      - type: contains
+        value: "Recommended"
+        message: "应有推荐项"
+      - type: contains
+        value: "php artisan migrate"
+        message: "应包含迁移命令"
+
+# ==================== v13 兼容性测试 ====================
+
+v13_compatibility_tests:
+  - id: V13-001
+    name: "v13 SKILL.md 入口文件存在"
+    description: |
+      验证 v13 版本的入口文件存在
+    file: "v13/SKILL.md"
+    assertions:
+      - type: exists
+        message: "v13/SKILL.md 应存在"
+      - type: contains
+        value: "qscmf-backend-v13"
+        message: "应包含 v13 标识"
+
+  - id: V13-002
+    name: "v13 模式路由正确"
+    description: |
+      验证 v13 SKILL.md 包含所有模式路由
+    file: "v13/SKILL.md"
+    assertions:
+      - type: contains
+        value: "scaffold.md"
+        message: "应路由到 scaffold.md"
+      - type: contains
+        value: "guide.md"
+        message: "应路由到 guide.md"
+      - type: contains
+        value: "learn.md"
+        message: "应路由到 learn.md"
+
+  - id: V13-003
+    name: "v13 模板文件存在"
+    description: |
+      验证 v13 模板目录包含必要文件
+    files:
+      - "v13/templates/admin_controller.php.tpl"
+      - "v13/templates/model.php.tpl"
+      - "v13/templates/api_controller.php.tpl"
+      - "v13/templates/test_case.php.tpl"
+    assertions:
+      - type: exists
+        message: "v13 模板文件应存在"
+
+  - id: V13-004
+    name: "v13 包含 jQuery 渲染规则"
+    description: |
+      验证 v13 包含 legacy-jquery.md
+    file: "v13/rules/legacy-jquery.md"
+    assertions:
+      - type: exists
+        message: "legacy-jquery.md 应存在"
+      - type: contains
+        value: "Bootstrap"
+        message: "应包含 Bootstrap 相关内容"
+      - type: contains
+        value: "jQuery"
+        message: "应包含 jQuery 相关内容"
+
+  - id: V13-005
+    name: "v13 ListBuilder API 规则存在"
+    description: |
+      验证 v13 包含 ListBuilder API 规则
+    file: "v13/rules/listbuilder-api.md"
+    assertions:
+      - type: exists
+        message: "listbuilder-api.md 应存在"
+
+  - id: V13-006
+    name: "v13 FormBuilder API 规则存在"
+    description: |
+      验证 v13 包含 FormBuilder API 规则
+    file: "v13/rules/formbuilder-api.md"
+    assertions:
+      - type: exists
+        message: "formbuilder-api.md 应存在"
+
+  - id: V13-007
+    name: "v13 特有 CRUD 表格列规则"
+    description: |
+      验证 v13 有专门的表格列规则文件
+    file: "v13/rules/crud/crud-table-columns-v13.md"
+    assertions:
+      - type: exists
+        message: "crud-table-columns-v13.md 应存在"
+
+  - id: V13-008
+    name: "v13 scaffold 工作流包含验证引用"
+    description: |
+      验证 v13 scaffold 引用 verify 模式
+    file: "v13/modes/scaffold.md"
+    assertions:
+      - type: contains
+        value: "ListBuilder"
+        message: "应引用 ListBuilder API"
+      - type: contains
+        value: "FormBuilder"
+        message: "应引用 FormBuilder API"
+
+# ==================== 学习模式测试 ====================
+
+learn_mode_tests:
+  - id: LM-001
+    name: "Learn 模式触发词定义"
+    description: |
+      验证 learn 模式的触发词在入口文件中定义
+    file: "v14/SKILL.md"
+    assertions:
+      - type: contains
+        value: "/qscmf-learn"
+        message: "应包含 /qscmf-learn 触发词"
+      - type: contains
+        value: "learn.md"
+        message: "应路由到 learn.md"
+
+  - id: LM-002
+    name: "Learn 模式入口文件存在"
+    description: |
+      验证 learn.md 模式文件存在
+    file: "v14/modes/learn.md"
+    assertions:
+      - type: exists
+        message: "learn.md 应存在"
+      - type: contains
+        value: "/qscmf-learn"
+        message: "应包含触发命令"
+
+  - id: LM-003
+    name: "failures.yaml 格式有效"
+    description: |
+      验证 failures.yaml 是有效的 YAML 格式
+    file: "_shared/learn/failures.yaml"
+    assertions:
+      - type: contains
+        value: "failures:"
+        message: "应包含 failures 根键"
+      - type: contains
+        value: "stats:"
+        message: "应包含 stats 统计区"
+
+  - id: LM-004
+    name: "学习缓存文件格式正确"
+    description: |
+      验证 cache.yaml 包含必要结构
+    file: "_shared/learn/cache.yaml"
+    assertions:
+      - type: contains
+        value: "metadata:"
+        message: "应包含 metadata 元数据区"
+      - type: contains
+        value: "scan_history:"
+        message: "应包含 scan_history 扫描历史"
+
+  - id: LM-005
+    name: "工作流包含学习类型分类"
+    description: |
+      验证 workflow.md 定义了学习类型
+    file: "_shared/learn/workflow.md"
+    assertions:
+      - type: contains
+        value: "Pattern"
+        message: "应包含 Pattern 模式类型"
+      - type: contains
+        value: "API Usage"
+        message: "应包含 API Usage 类型"
+      - type: contains
+        value: "Field Type"
+        message: "应包含 Field Type 类型"
+      - type: contains
+        value: "Template"
+        message: "应包含 Template 类型"
+
+  - id: LM-006
+    name: "工作流包含置信度评分定义"
+    description: |
+      验证 workflow.md 定义了置信度评分标准
+    file: "_shared/learn/workflow.md"
+    assertions:
+      - type: contains
+        value: "HIGH"
+        message: "应定义 HIGH 置信度"
+      - type: contains
+        value: "MEDIUM"
+        message: "应定义 MEDIUM 置信度"
+      - type: contains
+        value: "LOW"
+        message: "应定义 LOW 置信度"
+      - type: contains
+        value: "Confidence"
+        message: "应有置信度章节"
+
+  - id: LM-007
+    name: "工作流包含深扫描警告"
+    description: |
+      验证 workflow.md 包含深扫描的警告说明
+    file: "_shared/learn/workflow.md"
+    assertions:
+      - type: contains
+        value: "Deep Scan"
+        message: "应包含深扫描章节"
+      - type: contains
+        value: "--deep-scan"
+        message: "应包含深扫描触发参数"
+      - type: contains
+        value: "Warning"
+        message: "应包含警告说明"
+
+  - id: LM-008
+    name: "工作流包含幂等性检查"
+    description: |
+      验证 workflow.md 包含幂等性检查步骤
+    file: "_shared/learn/workflow.md"
+    assertions:
+      - type: contains
+        value: "Idempotency"
+        message: "应包含幂等性检查章节"
+      - type: contains
+        value: "hash"
+        message: "应使用 hash 检测重复"
+
+  - id: LM-009
+    name: "工作流包含修正提案格式"
+    description: |
+      验证 workflow.md 定义了 Issues Found 格式
+    file: "_shared/learn/workflow.md"
+    assertions:
+      - type: contains
+        value: "Issues Found"
+        message: "应包含 Issues Found 章节"
+      - type: contains
+        value: "api-mismatch"
+        message: "应定义 api-mismatch 问题类型"
+      - type: contains
+        value: "version-confusion"
+        message: "应定义 version-confusion 问题类型"
+
+  - id: LM-010
+    name: "工作流强调抽象而非业务特定"
+    description: |
+      验证 workflow.md 包含抽象化原则
+    file: "_shared/learn/workflow.md"
+    assertions:
+      - type: contains
+        value: "Abstract, Not Business-Specific"
+        message: "应包含抽象化原则"
+      - type: contains
+        value: "CRITICAL"
+        message: "应标记为关键规则"
+
+  - id: LM-011
+    name: "v13 learn 模式文件存在"
+    description: |
+      验证 v13 版本的 learn 模式文件存在
+    file: "v13/modes/learn.md"
+    assertions:
+      - type: exists
+        message: "v13/modes/learn.md 应存在"
+      - type: contains
+        value: "/qscmf-learn"
+        message: "应包含触发命令"
+
+# ==================== 模板完整性测试 ====================
+
+template_integrity_tests:
+  - id: TI-001
+    name: "v14 Admin 控制器模板包含必要元素"
+    description: |
+      验证 admin_controller 模板包含基本结构
+    file: "v14/templates/admin_controller.php.tpl"
+    assertions:
+      - type: contains
+        value: "GyListController"
+        message: "应继承 GyListController"
+      - type: contains
+        value: "namespace"
+        message: "应包含 namespace 声明"
+
+  - id: TI-002
+    name: "v14 Model 模板包含必要元素"
+    description: |
+      验证 model 模板包含基本结构
+    file: "v14/templates/model.php.tpl"
+    assertions:
+      - type: contains
+        value: "GyListModel"
+        message: "应继承 GyListModel"
+      - type: contains
+        value: "namespace"
+        message: "应包含 namespace 声明"
+
+  - id: TI-003
+    name: "v14 API 控制器模板包含必要元素"
+    description: |
+      验证 api_controller 模板包含基本结构
+    file: "v14/templates/api_controller.php.tpl"
+    assertions:
+      - type: contains
+        value: "RestController"
+        message: "应继承 RestController"
+      - type: contains
+        value: "namespace"
+        message: "应包含 namespace 声明"
+
+  - id: TI-004
+    name: "v13 Admin 控制器模板包含必要元素"
+    description: |
+      验证 v13 admin_controller 模板包含基本结构
+    file: "v13/templates/admin_controller.php.tpl"
+    assertions:
+      - type: contains
+        value: "QsListController"
+        message: "应继承 QsListController"
+      - type: contains
+        value: "namespace"
+        message: "应包含 namespace 声明"
+
+  - id: TI-005
+    name: "v13 Model 模板包含必要元素"
+    description: |
+      验证 v13 model 模板包含基本结构
+    file: "v13/templates/model.php.tpl"
+    assertions:
+      - type: contains
+        value: "GyListModel"
+        message: "应继承 GyListModel"
+      - type: contains
+        value: "namespace"
+        message: "应包含 namespace 声明"

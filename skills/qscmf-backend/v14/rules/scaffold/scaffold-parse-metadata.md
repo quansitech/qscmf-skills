@@ -1,5 +1,6 @@
 ---
 title: Scaffold Parse Metadata (v14)
+version: v14
 impact: HIGH
 impactDescription: Required for code generation from migrations
 tags: scaffold, parse, metadata, v14

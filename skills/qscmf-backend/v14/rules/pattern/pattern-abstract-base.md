@@ -1,5 +1,6 @@
 ---
 title: Abstract Base Pattern (v14)
+version: v14
 impact: HIGH
 impactDescription: Reduces code duplication for similar modules
 tags: pattern, abstract, base, v14
