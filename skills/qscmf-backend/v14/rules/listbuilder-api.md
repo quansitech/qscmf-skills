@@ -1,3 +1,10 @@
+---
+title: ListBuilder API 参考 (v14)
+version: v14
+impact: HIGH
+when: "使用 ListBuilder 构建后台列表页面时使用"
+---
+
 # ListBuilder API Reference
 
 Complete reference for the ListBuilder API used in QSCMF for building admin list pages.

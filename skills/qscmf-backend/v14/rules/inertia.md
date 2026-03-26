@@ -1,3 +1,10 @@
+---
+title: Inertia.js 集成 (v14)
+version: v14
+impact: MEDIUM
+when: "使用 Inertia.js 实现 SPA 风格导航时使用"
+---
+
 # Inertia.js Integration (v14)
 
 Guide for using Inertia.js in QSCMF v14 for SPA-like navigation.

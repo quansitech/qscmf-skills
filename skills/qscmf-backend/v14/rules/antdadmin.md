@@ -1,3 +1,10 @@
+---
+title: AntdAdmin 组件参考 (v14)
+version: v14
+impact: HIGH
+when: "使用 AntdAdmin React 组件直接构建 UI 时使用"
+---
+
 # AntdAdmin Components Reference (v14)
 
 Reference for using AntdAdmin React components directly in QSCMF v14.

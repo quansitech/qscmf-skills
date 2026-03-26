@@ -1,13 +1,13 @@
+---
+title: 通用代码模式 (v14)
+version: v14
+impact: MEDIUM
+when: "应用抽象基类、Redis 锁、队列任务等通用模式时使用"
+---
+
 # Common Code Patterns
 
 > This file documents reusable patterns: Abstract Base Class, Redis Lock for concurrency, and Queue Job pattern.
->
-> **When to Use This Rule**:
-> - Multiple similar modules that share common logic → Abstract Base Class
-> - Batch operations that need concurrency control → Redis Lock
-> - Long-running or async tasks → Queue Job
-
-**Impact**: MEDIUM
 
 ---
 

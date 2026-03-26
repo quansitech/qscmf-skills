@@ -1,0 +1,31 @@
+# Failure Cases Repository
+#
+# Records verification failures for pattern extraction and rule updates.
+# Each failure captures what went wrong and how to fix it.
+#
+# Format:
+# failures:
+#   - id: "F001"
+#     timestamp: "ISO8601 datetime"
+#     pattern: "failure-pattern-type"
+#     trigger: "what user request caused this"
+#     error: "the actual error message"
+#     fix:
+#       target: "file path to fix"
+#       action: "description of fix"
+#       applied: false
+#     status: "pending|applied|wontfix"
+#
+# Pattern Types:
+# - field-type-mismatch: Field inferred wrong type
+# - missing-dependency: Generated code missing use statement
+# - api-mismatch: Using wrong API method
+# - validation-missing: Model validation rule missing
+
+failures: []
+
+# Statistics
+stats:
+  total: 0
+  applied: 0
+  pending: 0

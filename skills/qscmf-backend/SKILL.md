@@ -1,27 +1,15 @@
 ---
 name: qscmf-backend
 description: |
-  QSCMF framework backend development. Auto-detects version from composer.json.
+  QSCMF framework backend development (PHP 8.2+, ThinkPHP + Laravel hybrid).
 
-  **Version Detection**: Reads composer.json for `tiderjian/think-core` version.
-  - `^14.0` -> v14 (PHP 8.2+, PHPUnit 10, AntdAdmin Component API, Inertia.js)
-  - `^13.0` -> v13 (PHP 8.2, PHPUnit 9, ListBuilder API, jQuery)
-  - not found -> v14 (default to latest)
+  **Trigger when:**
+  - Scaffold: "创建", "生成", "scaffold", "模块", "CRUD"
+  - Guide: "如何", "怎样", "?", "QSCMF 开发问题"
+  - Debug: "报错", "错误", "失败", "bug"
+  - Learn: "/qscmf-learn"
 
-  **API Differences**:
-  - v13: Uses `\Qscmf\Builder\ListBuilder` API (jQuery rendering)
-  - v14: Uses `\AntdAdmin\Component\Table` API (React rendering) OR ListBuilder API (backward compat)
-
-  **Operation Modes**:
-  - Scaffold Mode: Code generation triggered by "创建", "生成", "scaffold", "CRUD"
-  - Guide Mode: Development assistance for QSCMF questions
-  - Learning Mode: Capture knowledge via `/qscmf-learn` after sessions
-
-  **Project Detection**: Activates when project contains app/ + lara/ directories.
-
-  **Version Override**: Use "qscmf-backend v14 ..." or "qscmf-backend v13 ..." to force version.
-
-  Triggers: "创建", "生成", "CRUD", "API", "QsListController", "GyListModel", "/qscmf-learn", "/qscmf-backend"
+  Auto-detects version from composer.json (v13/v14).
 ---
 
 # QSCMF Backend Development

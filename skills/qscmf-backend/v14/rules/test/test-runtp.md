@@ -1,4 +1,11 @@
-# runTp() 进程隔离测试机制
+---
+title: runTp() 进程隔离测试 (v14)
+version: v14
+impact: CRITICAL
+when: "在 Laravel 测试环境中执行 ThinkPHP 代码时使用"
+---
+
+# runTp() 进程隔离测试机制 (v14)
 
 > 在 Laravel 测试环境中执行 ThinkPHP 代码
 
@@ -338,3 +345,4 @@ public function gets()
 - [test-tdd-first.md](test-tdd-first.md) - TDD 工作流
 - [test-transaction.md](test-transaction.md) - 数据库事务
 - [test-wall-mock.md](test-wall-mock.md) - 外部 API Mock
+- [test-cli-controller.md](test-cli-controller.md) - CLI 控制器测试模式

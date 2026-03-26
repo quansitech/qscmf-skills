@@ -1,0 +1,39 @@
+name: "Product CRUD Scaffold"
+description: "Verify Product module scaffold generates correct CRUD code"
+input: "创建 Product 模块，需要后台 CRUD"
+
+assertions:
+  # File existence checks
+  - type: file-exists
+    path: "app/Admin/Controller/ProductController.class.php"
+    message: "Admin controller should be created"
+
+  - type: file-exists
+    path: "app/Common/Model/ProductModel.class.php"
+    message: "Model should be created"
+
+  - type: file-exists
+    path: "lara/database/migrations/*_create_product_table.php"
+    message: "Migration should be created"
+    glob: true
+
+  # Content checks (attribute detection, not exact match)
+  - type: contains
+    file: "app/Admin/Controller/ProductController.class.php"
+    values:
+      - "QsListController"
+      - "addTableColumn"
+      - "builder()"
+    message: "Controller should use ListBuilder API"
+
+  - type: contains
+    file: "app/Common/Model/ProductModel.class.php"
+    values:
+      - "GyListModel"
+      - "$_validate"
+    message: "Model should extend GyListModel with validation"
+
+  # Syntax validation
+  - type: php-lint
+    pattern: "app/**/*.php"
+    message: "All PHP files should pass syntax check"

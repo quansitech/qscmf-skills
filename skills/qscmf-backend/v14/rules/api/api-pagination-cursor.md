@@ -1,4 +1,11 @@
-# API Pagination
+---
+title: API Pagination (v14)
+version: v14
+impact: HIGH
+when: "实现 API 分页接口时使用"
+---
+
+# API Pagination (v14)
 
 Pagination strategies for RESTful API endpoints.
 

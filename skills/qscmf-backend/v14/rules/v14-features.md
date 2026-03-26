@@ -1,13 +1,13 @@
+---
+title: v14 特性 (v14)
+version: v14
+impact: MEDIUM
+when: "使用 v14 特有功能（Inertia.js、AntdAdmin 组件、ListAdapter）时使用"
+---
+
 # v14-Specific Features
 
 > This file documents v14-specific features: Inertia.js integration, direct AntdAdmin component usage, and ListAdapter pattern.
->
-> **When to Use This Rule**:
-> - Implementing SPA-like navigation with Inertia.js
-> - Using AntdAdmin components directly (beyond ListBuilder)
-> - Customizing the rendering layer via ListAdapter
-
-**Impact**: MEDIUM
 
 ---
 

@@ -1,3 +1,10 @@
+---
+title: 字段类型推断策略 (v14)
+version: v14
+impact: HIGH
+when: "从数据库 schema 自动推断表单字段类型时使用"
+---
+
 # Field Type Inference Strategy
 
 Three-layer strategy for inferring form field types from database schema.

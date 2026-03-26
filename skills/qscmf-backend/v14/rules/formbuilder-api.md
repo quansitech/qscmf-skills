@@ -1,3 +1,10 @@
+---
+title: FormBuilder API 参考 (v14)
+version: v14
+impact: HIGH
+when: "使用 FormBuilder 构建后台表单页面时使用"
+---
+
 # FormBuilder API Reference
 
 Complete reference for the FormBuilder API used in QSCMF for building admin forms.

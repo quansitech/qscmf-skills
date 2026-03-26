@@ -452,6 +452,81 @@ protected function buildSearchWhere($get_data, &$map)
 
 ---
 
+## Filter-Only vs Display-Only Columns
+
+Sometimes you need a column only for filtering (not displayed in table) or only for display (no filter). Use `hideInTable()` and `setSearch(false)` to control this.
+
+### Filter-Only Column (筛选专用列)
+
+Use `hideInTable()` to hide the column from table but keep the filter:
+
+```php
+// 同步状态筛选（只用于筛选，不展示）
+$container->select('sync_process_status', '同步状态')
+    ->setValueEnum([
+        -1 => '未同步',
+        0 => '处理中',
+        1 => '成功',
+        2 => '失败',
+        3 => '已取消',
+    ])
+    ->hideInTable();
+```
+
+### Display-Only Column (展示专用列)
+
+Use `setSearch(false)` to hide the filter but keep the column in table:
+
+```php
+// 同步状态展示（带弹窗，不筛选）
+$sync_status_column = new \Common\Lib\AdminComponent\ColumnType\StatusWithModal('sync_status_display', '同步状态');
+$sync_status_column->setValueEnum($sync_status_enum)
+    ->setOnClickModal($this->buildSyncErrorModal())
+    ->setClickableStatuses([DBCont::RESOURCE_STORE_PROCESS_STATUS_FAILED])
+    ->setStatusValueField('sync_process_status')
+    ->setSearch(false);
+$container->addColumn($sync_status_column);
+```
+
+### Combined Pattern: Same Field for Filter + Custom Display
+
+When you need both filtering and custom display (e.g., status with modal):
+
+```php
+// 准备枚举
+$sync_status_enum = [];          // 复杂枚举（用于 StatusWithModal 展示）
+$sync_status_filter_enum = [];   // 简单枚举（用于 select 筛选）
+$sync_status_list = DBCont::getKstoreProcessStatusList();
+
+foreach ($sync_status_list as $value => $text) {
+    $sync_status_enum[$value] = ['text' => $text, 'status' => 'Processing'];
+    $sync_status_filter_enum[$value] = $text;
+}
+
+// 筛选列（使用简单枚举，隐藏表格列）
+$container->select('sync_process_status', '同步状态')
+    ->setValueEnum($sync_status_filter_enum)
+    ->hideInTable();
+
+// 展示列（使用复杂枚举，隐藏筛选）
+$sync_status_column = new StatusWithModal('sync_status_display', '同步状态');
+$sync_status_column->setValueEnum($sync_status_enum)
+    ->setSearch(false);
+$container->addColumn($sync_status_column);
+```
+
+### Method Reference
+
+| Method | Effect |
+|--------|--------|
+| `hideInTable()` | Hide column from table, keep filter |
+| `setSearch(false)` | Hide filter, keep column in table |
+| `setSearch(true)` | Enable filter (default for most columns) |
+
+> **Note**: `selectText` is for composite filtering scenarios, not for hiding table columns. Use `select()->hideInTable()` instead.
+
+---
+
 ## Complete Example
 
 ```php

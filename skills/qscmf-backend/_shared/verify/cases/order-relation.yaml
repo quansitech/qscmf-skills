@@ -1,0 +1,23 @@
+name: "Order Relation Scaffold"
+description: "Verify Order module with OrderItem relation"
+input: "创建 Order 模块，包含 OrderItem 关联"
+
+assertions:
+  - type: file-exists
+    path: "app/Admin/Controller/OrderController.class.php"
+
+  - type: file-exists
+    path: "app/Common/Model/OrderModel.class.php"
+
+  - type: file-exists
+    path: "app/Common/Model/OrderItemModel.class.php"
+
+  - type: contains
+    file: "app/Common/Model/OrderModel.class.php"
+    values:
+      - "GyListModel"
+      - "relation"
+    message: "Order model should define relation to OrderItem"
+
+  - type: php-lint
+    pattern: "app/**/Order*.php"

@@ -23,7 +23,15 @@ Scan conversation for:
 - Reusable patterns, field type mappings, version differences
 - "Good to know", "Important", "Just discovered" markers
 
-**Output:** Candidate learnings + potential correction issues (from Step 2.5)
+### Failure Pattern Detection
+
+Check if current session contains patterns matching `failures.yaml`:
+- Same field type inference errors
+- Same API usage mistakes
+- Same missing dependencies
+- Cross-reference with historical failures to detect recurrence
+
+**Output:** Candidate learnings + potential correction issues (from Step 2.5) + recurring failures (from Step 2.6)
 
 ---
 
@@ -170,6 +178,23 @@ For each learning:
 ```
 
 **Issue Types:** `api-mismatch`, `parameter-necessity`, `version-confusion`, `outdated-content`, `inconsistent`
+
+### Failures Captured (From Verification)
+
+```markdown
+## Failures Captured ({count} items)
+
+### Pending ({count})
+- [ ] **[{pattern}]** {trigger}
+     - Error: {error}
+     - Suggested Fix: {fix.action} → {fix.target}
+     [Review] [Apply Fix] [Skip]
+
+### Applied ({count})
+- [x] **[{pattern}]** {trigger} → Fixed at {timestamp}
+```
+
+**Failure Pattern Types:** `field-type-mismatch`, `missing-dependency`, `api-mismatch`, `validation-missing`
 
 ---
 
